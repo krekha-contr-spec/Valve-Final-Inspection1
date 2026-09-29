@@ -1,0 +1,6 @@
+{
+  "name": "Valve Final Inspection",
+  "description": "Industrial valve quality inspection system with visual defect analysis, camera monitoring, and defect reporting dashboard.",
+  "prompt": "Valve Final Inspection Dashboard and Quality Management System",
+  "capabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
