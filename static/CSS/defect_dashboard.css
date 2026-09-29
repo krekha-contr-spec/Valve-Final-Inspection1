@@ -1,0 +1,137 @@
+h1 {
+    color: purple;
+    margin-top: 0px;
+    font-family: cursive;
+    font-weight: bold;
+    text-align: center;
+    font-size: 48px;
+}
+
+#defectDashboardFilters {
+    font-weight: bold;
+    color: #6A0DAD; 
+    font-size: 24px;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+#defectDashboardChart {
+    max-width: 100%;
+    margin: 40px auto;
+    display: block;
+}
+.dashboard-nav {
+    display: flex;
+    gap: 1rem;
+}
+
+.filter-form {
+    width: 100%;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.filter-form label {
+    font-size: 22px;
+}
+
+.filter-form select {
+    padding: 12px;
+    font-size: 16px;
+    font-weight: bold;
+    border-radius: 8px;
+    border: 2px solid #4CAF50;
+    background-color: #f9f9f9;
+    color: #A294F9;
+    width: 18%;
+    margin: 5px 15px;
+    text-align: center;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.filter-form select:focus {
+    outline: none;
+    border-color: #2e7d32;
+    box-shadow: 0 0 6px rgba(76, 175, 80, 0.5);
+}
+
+.damage-btn {
+    background-color: #ff4081;
+    border: none;
+    color: black;
+    font-weight: bold;
+    padding: 10px 20px;
+    font-size: 18px;
+    margin: 20px auto;
+    width: 10%;
+    border-radius: 10px;
+    text-decoration: none;
+    cursor: pointer;
+    display: block;
+    text-align: center;
+}
+
+.damage-btn:hover {
+    background-color: #d7376b;
+}
+
+#goToDashboardBtn {
+    width: 230px !important;
+    max-width: 250px !important;
+    min-width: 180px !important;
+    padding: 12px 20px !important;
+    font-size: 16px !important;
+    display: inline-block !important;
+    margin: 30px auto !important;
+    background-color: #007BFF !important;
+    color: white !important;
+    border: 2px solid #0056b3 !important;
+    border-radius: 10px !important;
+    cursor: pointer !important;
+    font-weight: bold !important;
+    text-decoration: none !important;
+    transition: all 0.3s ease !important;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2) !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+}
+
+#goToDashboardBtn:hover {
+    background-color: #0056b3 !important;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3) !important;
+    transform: translateY(-3px) !important;
+}
+
+#goToDashboardBtn:active {
+    background-color: #003d82 !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2) !important;
+}
+
+.button-wrapper {
+    text-align: center !important;
+    margin: 30px 0 !important;
+    display: flex !important;
+    justify-content: center !important;
+    width: 100% !important;
+}
+
+.dashboard-button:hover {
+    background-color: #0056b3;
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    transform: translateY(-3px);
+}
+
+.dashboard-button:active {
+    background-color: #003d82;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dashboard-button:focus {
+    outline: 2px solid #FF8C00;
+    outline-offset: 2px;
+}

@@ -1,0 +1,75 @@
+{
+  "storage": {
+    "inspection_root": "inspections",
+    "uploads_dir": "static/uploads"
+  },
+  "valve_types": {
+    "Gate Valve": {
+      "required_images": 7,
+      "positions": ["Front", "Back", "Left", "Right", "Top", "Bottom", "Marking"]
+    },
+    "Ball Valve": {
+      "required_images": 5,
+      "positions": ["Front", "Back", "Side", "Top", "Bottom"]
+    },
+    "Check Valve": {
+      "required_images": 6,
+      "positions": ["Front", "Back", "Top", "Bottom", "Inlet", "Outlet"]
+    },
+    "Butterfly Valve": {
+      "required_images": 8,
+      "positions": ["Front", "Back", "Left", "Right", "Top", "Bottom", "Flange_A", "Flange_B"]
+    },
+    "Globe Valve": {
+      "required_images": 10,
+      "positions": ["Front", "Back", "Left", "Right", "Top", "Bottom", "Seat", "Stem", "Handwheel", "Marking"]
+    }
+  },
+  "cameras": [
+    {
+      "camera_id": "CAM-01",
+      "device_index": 0,
+      "ip": "192.168.1.101",
+      "port": 8080,
+      "enabled": true,
+      "position": "Front",
+      "resolution": [1920, 1080],
+      "fps": 30
+    },
+    {
+      "camera_id": "CAM-02",
+      "device_index": 1,
+      "ip": "192.168.1.102",
+      "port": 8080,
+      "enabled": true,
+      "position": "Back",
+      "resolution": [1920, 1080],
+      "fps": 30
+    },
+    {
+      "camera_id": "CAM-03",
+      "device_index": 2,
+      "ip": "192.168.1.103",
+      "port": 8080,
+      "enabled": true,
+      "position": "Side",
+      "resolution": [1920, 1080],
+      "fps": 30
+    },
+    {
+      "camera_id": "CAM-04",
+      "device_index": 3,
+      "ip": "192.168.1.104",
+      "port": 8080,
+      "enabled": false,
+      "position": "Top",
+      "resolution": [1920, 1080],
+      "fps": 30
+    }
+  ],
+  "capture": {
+    "timeout": 10,
+    "retry_count": 3,
+    "retry_delay_sec": 2.0
+  }
+}

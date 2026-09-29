@@ -1,0 +1,113 @@
+{
+  "inspection_id": "INS-20260826-0013",
+  "valve_type": "Gate Valve",
+  "required_images": 7,
+  "positions": [
+    "Front",
+    "Back",
+    "Left",
+    "Right",
+    "Top",
+    "Bottom",
+    "Marking"
+  ],
+  "operator": "Operator",
+  "start_time": "2026-08-26T17:17:45.902732",
+  "end_time": null,
+  "status": "INSPECTION_STARTED",
+  "final_result": "PENDING",
+  "captured_images": [
+    {
+      "image_id": "IMG_cam1_FRONT_20260826_171801_3",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Front",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_FRONT_20260826_171801_3.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_FRONT_20260826_171801_3.jpg",
+      "timestamp": "2026-08-26T17:18:01.322992",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "f557848a367f7c3ecad9d35daf433d07",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_BACK_20260826_171932_1",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Back",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_BACK_20260826_171932_1.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_BACK_20260826_171932_1.jpg",
+      "timestamp": "2026-08-26T17:19:32.113982",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "ec0ebd28e983ca23f74bcc842fc6208c",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_LEFT_20260826_171936_7",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Left",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_LEFT_20260826_171936_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_LEFT_20260826_171936_7.jpg",
+      "timestamp": "2026-08-26T17:19:36.739409",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "d16a10c31f8e58196421466c8bf925e1",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_RIGHT_20260826_171938_4",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Right",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_RIGHT_20260826_171938_4.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_RIGHT_20260826_171938_4.jpg",
+      "timestamp": "2026-08-26T17:19:38.402071",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "5d444ac7c25905f3aaa5a473af222236",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_TOP_20260826_171939_1",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Top",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_TOP_20260826_171939_1.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_TOP_20260826_171939_1.jpg",
+      "timestamp": "2026-08-26T17:19:39.194827",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "4b40ba2918ae068d626296d9070d0a4e",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_BOTTOM_20260826_171939_4",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Bottom",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_BOTTOM_20260826_171939_4.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_BOTTOM_20260826_171939_4.jpg",
+      "timestamp": "2026-08-26T17:19:39.438280",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "7f22c51da675d244161c9788bcfb3a59",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_MARKING_20260826_171939_6",
+      "inspection_id": "INS-20260826-0013",
+      "camera_id": "cam1",
+      "image_position": "Marking",
+      "file_path": "inspections/2026/08/26/INS-20260826-0013/cam1/IMG_cam1_MARKING_20260826_171939_6.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0013\\cam1\\IMG_cam1_MARKING_20260826_171939_6.jpg",
+      "timestamp": "2026-08-26T17:19:39.656644",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "ccd0dcad6d585cd400d2ec45ffae59c2",
+      "status": "VALID"
+    }
+  ],
+  "defects": []
+}

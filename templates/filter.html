@@ -1,0 +1,174 @@
+{% extends "nav.html" %}
+{% block title %}Filter Report{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/filter.css') }}">
+{% endblock %}
+
+{% block content %}
+
+<div class="container-fluid mt-3 px-4">
+
+  <div class="card shadow-lg">
+    <div class="card-header bg-primary text-white text-center">
+      <h2 class="mb-0">Inspection Data Report</h2>
+    </div>
+
+    <div class="card-body">
+
+      <!-- FILTER ROW -->
+      <div class="d-flex align-items-center gap-3 mb-4 flex-wrap">
+        <label class="form-label fw-bold mb-0" style="color: #2F6FE4;">
+          <i class="fas fa-filter"></i> Time Filter:
+        </label>
+        <select id="filter" class="form-select w-auto" onchange="loadData()">
+          <option value="daily">Daily</option>
+          <option value="weekly">Weekly</option>
+          <option value="monthly">Monthly</option>
+          <option value="3months">3 Months</option>
+          <option value="6months">6 Months</option>
+          <option value="yearly">Yearly</option>
+        </select>
+
+        <button id="downloadBtn" class="btn btn-outline-primary ms-auto" onclick="downloadReport()">
+          <i class="fas fa-download"></i> Download Rejected Report
+        </button>
+      </div>
+
+      <!-- SUMMARY BADGES -->
+      <div class="d-flex gap-3 mb-3">
+        <span class="summary-badge badge fs-6 px-3 py-2" style="background:#198754;">
+          Accepted: <span id="acceptedCount">—</span>
+        </span>
+        <span class="summary-badge badge fs-6 px-3 py-2" style="background:#dc3545;">
+          Rejected: <span id="rejectedCount">—</span>
+        </span>
+      </div>
+
+      <!-- TABS -->
+      <ul class="nav nav-tabs mb-3" id="resultTabs">
+        <li class="nav-item">
+          <button class="nav-link active" id="tab-rejected" onclick="switchTab('rejected')">
+            <i class="fas fa-times-circle text-danger"></i> Rejected
+          </button>
+        </li>
+        <li class="nav-item">
+          <button class="nav-link" id="tab-accepted" onclick="switchTab('accepted')">
+            <i class="fas fa-check-circle text-success"></i> Accepted
+          </button>
+        </li>
+      </ul>
+
+      <!-- TABLE -->
+      <div class="table-wrapper">
+        <table id="resultsTable" class="table table-bordered table-striped table-hover">
+          <thead class="table-dark text-center">
+            <tr>
+              <th>S.No</th>
+              <th>Part Number</th>
+              <th>Result</th>
+              <th>Defect Type</th>
+              <th>Timestamp</th>
+              <th>Report</th>
+            </tr>
+          </thead>
+          <tbody class="text-center" id="tableBody"></tbody>
+        </table>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let activeTab = "rejected";
+  let rejectedRows = [];
+  let acceptedRows = [];
+
+  function switchTab(tab) {
+    activeTab = tab;
+    document.getElementById("tab-rejected").classList.toggle("active", tab === "rejected");
+    document.getElementById("tab-accepted").classList.toggle("active", tab === "accepted");
+
+    const label = tab.charAt(0).toUpperCase() + tab.slice(1);
+    document.getElementById("downloadBtn").innerHTML =
+      `<i class="fas fa-download"></i> Download ${label} Report`;
+
+    renderTable(tab === "rejected" ? rejectedRows : acceptedRows, tab);
+  }
+
+  function renderTable(data, type) {
+    const tbody = document.getElementById("tableBody");
+    tbody.innerHTML = "";
+
+    if (!data || data.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="text-muted">No ${type} data found for this period.</td></tr>`;
+      return;
+    }
+
+    data.forEach((row, index) => {
+      const badgeClass = type === "rejected" ? "bg-danger" : "bg-success";
+      const resultLabel = row.Result || (type === "rejected" ? "Rejected" : "Accepted");
+
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${index + 1}</td>
+        <td>${row.Part_number ?? "—"}</td>
+        <td><span class="badge ${badgeClass}">${resultLabel}</span></td>
+        <td>${row.Defect_type ?? (type === "accepted" ? "N/A" : "—")}</td>
+        <td>${row.timestamp ?? "—"}</td>
+        <td>
+          <button class="btn btn-success btn-sm" onclick="openReport(${index}, '${type}')">
+            <i class="fas fa-file-alt"></i> View
+          </button>
+        </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  async function loadData() {
+    const filter = document.getElementById("filter").value;
+
+    document.getElementById("acceptedCount").textContent = "…";
+    document.getElementById("rejectedCount").textContent = "…";
+    document.getElementById("tableBody").innerHTML =
+      `<tr><td colspan="6" class="text-center text-muted">Loading…</td></tr>`;
+
+    try {
+      const [rejRes, accRes] = await Promise.all([
+        fetch(`/api/rejected-data/${filter}`),
+        fetch(`/api/accepted-data/${filter}`)
+      ]);
+
+      rejectedRows = await rejRes.json();
+      acceptedRows = await accRes.json();
+
+      if (!Array.isArray(rejectedRows)) rejectedRows = [];
+      if (!Array.isArray(acceptedRows)) acceptedRows = [];
+
+      document.getElementById("rejectedCount").textContent = rejectedRows.length;
+      document.getElementById("acceptedCount").textContent = acceptedRows.length;
+
+      renderTable(activeTab === "rejected" ? rejectedRows : acceptedRows, activeTab);
+
+    } catch (err) {
+      console.error("Error fetching inspection data:", err);
+      document.getElementById("tableBody").innerHTML =
+        `<tr><td colspan="6" class="text-danger text-center">Failed to load data. Please try again.</td></tr>`;
+    }
+  }
+
+  function openReport(index, type) {
+    window.open(`/report/${index}`, "_blank");
+  }
+
+  function downloadReport() {
+    const filter = document.getElementById("filter").value;
+    window.location.href = `/api/reports/filter-export?filter=${filter}&result=${activeTab}`;
+  }
+
+  window.onload = loadData;
+</script>
+{% endblock %}

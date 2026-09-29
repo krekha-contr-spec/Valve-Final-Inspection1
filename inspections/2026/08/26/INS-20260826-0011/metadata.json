@@ -1,0 +1,19 @@
+{
+  "inspection_id": "INS-20260826-0011",
+  "valve_type": "Ball Valve",
+  "required_images": 5,
+  "positions": [
+    "Front",
+    "Back",
+    "Side",
+    "Top",
+    "Bottom"
+  ],
+  "operator": "Operator",
+  "start_time": "2026-08-26T17:16:02.094421",
+  "end_time": null,
+  "status": "INSPECTION_STARTED",
+  "final_result": "PENDING",
+  "captured_images": [],
+  "defects": []
+}

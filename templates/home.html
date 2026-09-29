@@ -1,0 +1,238 @@
+{% extends "nav.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/home.css') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<div class="home-wrapper">
+
+    <!-- Animated background grid -->
+    <div class="bg-grid"></div>
+
+    <!-- Decorative corner accents -->
+    <div class="corner-accent top-left"></div>
+    <div class="corner-accent bottom-right"></div>
+
+    <!-- Floating orbs -->
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+
+    <!-- Main content -->
+    <div class="home-content">
+
+        <!-- Live status badge -->
+        <div class="status-badge">
+            <span class="status-dot"></span>
+            <span class="status-text">System Online — Camera Active</span>
+        </div>
+
+        <!-- Brand + Icon row -->
+        <div class="brand-row">
+            <div class="brand-icon">
+                <svg width="36" height="36" viewBox="0 0 36 36" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="18" cy="18" r="8" stroke="#00d4ff" stroke-width="1.5" fill="none"/>
+                    <circle cx="18" cy="18" r="3" fill="#00d4ff"/>
+                    <line x1="18" y1="2" x2="18" y2="10" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="18" y1="26" x2="18" y2="34" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="2" y1="18" x2="10" y2="18" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="26" y1="18" x2="34" y2="18" stroke="#00d4ff" stroke-width="1.5" stroke-linecap="round"/>
+                    <line x1="5.6" y1="5.6" x2="11.4" y2="11.4" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-linecap="round"/>
+                    <line x1="24.6" y1="24.6" x2="30.4" y2="30.4" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-linecap="round"/>
+                    <line x1="30.4" y1="5.6" x2="24.6" y2="11.4" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-linecap="round"/>
+                    <line x1="11.4" y1="24.6" x2="5.6" y2="30.4" stroke="rgba(0,212,255,0.4)" stroke-width="1" stroke-linecap="round"/>
+                </svg>
+            </div>
+            <div class="brand-label">RANE GROUP</div>
+            <div class="brand-divider"></div>
+            <div class="brand-sub">Vision Control</div>
+        </div>
+
+        <!-- Main heading -->
+        <h1 class="main-title">
+            Valve Final
+            <span class="title-accent">Inspection</span>
+        </h1>
+
+        <!-- Tagline -->
+        <p class="tagline">
+            AI-powered defect detection system ensuring
+            <strong>quality, reliability and safety</strong>
+            across every valve leaving the line.
+        </p>
+
+        <!-- Live stats strip -->
+        <!-- Live stats strip -->
+<div class="stats-strip">
+
+    <div class="stat-item">
+        <div class="stat-value" id="stat-inspected">0</div>
+        <div class="stat-label">Inspected Today</div>
+        <div class="stat-subtext">All-time: <span id="stat-inspected-total">0</span></div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value pass" id="stat-pass">0</div>
+        <div class="stat-label">Passed</div>
+        <div class="stat-subtext">All-time: <span id="stat-pass-total">0</span></div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value reject" id="stat-reject">0</div>
+        <div class="stat-label">Rejected</div>
+        <div class="stat-subtext">All-time: <span id="stat-reject-total">0</span></div>
+    </div>
+
+    <div class="stat-divider"></div>
+
+    <div class="stat-item">
+        <div class="stat-value warn" id="stat-parts">0</div>
+        <div class="stat-label">Part Numbers</div>
+        <div class="stat-subtext">All-time: <span id="stat-parts-total">0</span></div>
+    </div>
+
+</div>
+
+        <!-- Action buttons -->
+        <div class="action-grid">
+
+            <a href="/index" class="action-btn primary">
+                <div class="action-btn-icon">
+                    <i class="fa-solid fa-circle-play"></i>
+                </div>
+                <div class="action-btn-text">
+                    <span class="action-btn-label">Live Inspection</span>
+                    <span class="action-btn-sub">Start camera feed</span>
+                </div>
+                <i class="fa-solid fa-arrow-right action-btn-arrow"></i>
+            </a>
+
+            <a href="/dashboard" class="action-btn secondary">
+                <div class="action-btn-icon">
+                    <i class="fa-solid fa-chart-line"></i>
+                </div>
+                <div class="action-btn-text">
+                    <span class="action-btn-label">Dashboard</span>
+                    <span class="action-btn-sub">View analytics</span>
+                </div>
+                <i class="fa-solid fa-arrow-right action-btn-arrow"></i>
+            </a>
+
+            <a href="/valve-specs" class="action-btn secondary">
+                <div class="action-btn-icon">
+                    <i class="fa-solid fa-gear"></i>
+                </div>
+                <div class="action-btn-text">
+                    <span class="action-btn-label">Valve Specs</span>
+                    <span class="action-btn-sub">Browse part numbers</span>
+                </div>
+                <i class="fa-solid fa-arrow-right action-btn-arrow"></i>
+            </a>
+
+            <a href="/training" class="action-btn secondary">
+                <div class="action-btn-icon">
+                    <i class="fa-solid fa-brain"></i>
+                </div>
+                <div class="action-btn-text">
+                    <span class="action-btn-label">Training</span>
+                    <span class="action-btn-sub">Add reference images</span>
+                </div>
+                <i class="fa-solid fa-arrow-right action-btn-arrow"></i>
+            </a>
+
+        </div>
+
+        <!-- Footer line -->
+        <div class="home-footer">
+            <span>Rane Group Quality Systems</span>
+            <span class="footer-dot"></span>
+            <span>Plant P2 · P3 · P4</span>
+            <span class="footer-dot"></span>
+            <span>v2.1.0</span>
+        </div>
+
+    </div>
+
+<script>
+async function loadStats() {
+
+    try {
+
+        const response = await fetch("/dashboard_stats");
+
+        if (!response.ok) {
+            console.error("Failed to fetch stats - Status:", response.status);
+            console.error("Endpoint: /dashboard_stats might not exist or is incorrect");
+            
+            // Set default values when endpoint fails
+            document.getElementById("stat-inspected").textContent = "0";
+            document.getElementById("stat-pass").textContent = "0";
+            document.getElementById("stat-reject").textContent = "0";
+            document.getElementById("stat-parts").textContent = "0";
+
+            document.getElementById("stat-inspected-total").textContent = "0";
+            document.getElementById("stat-pass-total").textContent = "0";
+            document.getElementById("stat-reject-total").textContent = "0";
+            document.getElementById("stat-parts-total").textContent = "0";
+            
+            return;
+        }
+
+        const data = await response.json();
+        console.log("Stats data received:", data);
+
+        // Pass count (not percentage) - with fallback for different data structures
+        let passRate, passRateTotal;
+
+        if (data.accepted !== undefined) {
+            // Backend sends accepted count directly
+            passRate = data.accepted;
+        } else if (data.inspected !== undefined && data.rejected !== undefined) {
+            // Derive count from inspected - rejected
+            passRate = data.inspected - data.rejected;
+        } else {
+            passRate = 0;
+        }
+
+        if (data.accepted_total !== undefined) {
+            // Backend sends accepted_total count directly
+            passRateTotal = data.accepted_total;
+        } else if (data.inspected_total !== undefined && data.rejected_total !== undefined) {
+            // Derive count from inspected_total - rejected_total
+            passRateTotal = data.inspected_total - data.rejected_total;
+        } else {
+            passRateTotal = 0;
+        }
+
+        document.getElementById("stat-inspected").textContent = data.inspected || 0;
+        document.getElementById("stat-pass").textContent = passRate;
+        document.getElementById("stat-reject").textContent = data.rejected || 0;
+        document.getElementById("stat-parts").textContent = data.parts || 0;
+
+        document.getElementById("stat-inspected-total").textContent = data.inspected_total || 0;
+        document.getElementById("stat-pass-total").textContent = passRateTotal;
+        document.getElementById("stat-reject-total").textContent = data.rejected_total || 0;
+        document.getElementById("stat-parts-total").textContent = data.parts_total || 0;
+
+    } catch(err) {
+
+        console.error("Error loading stats:", err.message);
+
+    }
+}
+
+loadStats();
+
+setInterval(loadStats,3000);
+</script>
+
+{% endblock %}

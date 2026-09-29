@@ -1,0 +1,10 @@
+{
+  "inspection_id": "INS-20260826-0014",
+  "valve_type": "Check Valve",
+  "required_images": 6,
+  "captured_images_count": 6,
+  "final_result": "REJECTED",
+  "start_time": "2026-08-26T17:20:12.502862",
+  "end_time": "2026-08-26T17:20:21.769851",
+  "operator": "Operator"
+}

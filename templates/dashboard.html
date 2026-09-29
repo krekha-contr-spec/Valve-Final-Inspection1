@@ -1,0 +1,573 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Defect Dashboard - Vision System</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='CSS/dashboard.css') }}"
+    />
+  </head>
+
+  <body data-theme="light">
+    <!-- NAVIGATION HEADER -->
+    <header>
+      <div class="brand-section">
+        <div class="logo">
+          <img
+            src="{{ url_for('static', filename='Rane_Group_Logo.jpg') }}"
+            alt="Rane Group Logo"
+            height="50"
+          />
+        </div>
+        <div>
+          <div class="brand-subtitle">Rane Group · Vision System</div>
+          <div class="brand-title" id="page-title">Defect Dashboard</div>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="status-badge" id="live-btn" onclick="toggleLiveMode()">
+          <span class="pulse-dot"></span>
+          <span id="live-status-text">LIVE</span>
+        </div>
+
+        <div class="info-pill" id="scope-pill">All Plants · All Shifts</div>
+
+        <div class="info-pill" id="clock-pill">
+          Rejected units only · All parts · Daily · updated 09:42 IST
+        </div>
+
+        <div class="segmented-control">
+          <button
+            class="segmented-btn"
+            id="btn-tab-inspection"
+            onclick="switchView('inspection')"
+          >
+            Inspection
+          </button>
+          <button
+            class="segmented-btn active"
+            id="btn-tab-defects"
+            onclick="switchView('defects')"
+          >
+            Defects
+          </button>
+        </div>
+
+        <div class="segmented-control">
+          <button
+            class="icon-btn"
+            onclick="applyTheme('light')"
+            title="Light Theme"
+          >
+            ☀️
+          </button>
+          <button
+            class="icon-btn"
+            onclick="applyTheme('dark')"
+            title="Dark Theme"
+          >
+            🌙
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- FILTER BAR -->
+      <div class="filter-panel">
+        <div class="filter-group">
+          <div class="field-control">
+            <label>PLANT LOCATION</label>
+            <select id="sel-location">
+              <option>All Plants</option>
+            </select>
+          </div>
+          <div class="field-control">
+            <label>PART NUMBER</label>
+            <select id="sel-part">
+              <option>All Parts</option>
+            </select>
+          </div>
+          <div class="field-control">
+            <label>SHIFT</label>
+            <select id="sel-shift">
+              <option>All Shifts</option>
+              <option>Shift A</option>
+              <option>Shift B</option>
+              <option>Shift C</option>
+            </select>
+          </div>
+          <div class="field-control">
+            <label>TIME RANGE</label>
+            <select id="sel-range">
+              <option>Daily</option>
+              <option>Weekly</option>
+              <option>Monthly</option>
+              <option>3 Months</option>
+              <option>Yearly</option>
+            </select>
+          </div>
+        </div>
+        <button class="btn-submit" onclick="renderAll()">Apply filters</button>
+      </div>
+
+      <!-- VIEW 1: DEFECTS TAB -->
+      <div id="defects-tab" class="tab-panel active">
+        <!-- KPI STAT CARDS -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">TOTAL DEFECTS</span>
+              <span class="kpi-badge badge-danger">↗ 7%</span>
+            </div>
+            <div class="kpi-num" id="kpi-total">462</div>
+            <div class="kpi-sub" id="kpi-cat-count">Across 13 categories</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">TOP DEFECT</span>
+              <span class="kpi-badge badge-neutral">- 0%</span>
+            </div>
+            <div class="kpi-num" style="font-size: 22px" id="kpi-top-name">
+              Face Damage
+            </div>
+            <div class="kpi-sub" id="kpi-top-sub">
+              74 units · 16.0% of defects
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">TOP 3 SHARE</span>
+              <span class="kpi-badge badge-danger">↗ 2%</span>
+            </div>
+            <div class="kpi-num" id="kpi-top3-share">41.8%</div>
+            <div class="kpi-sub">Concentration of rejection causes</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">REJECT RATE</span>
+              <span class="kpi-badge badge-success">↘ 1%</span>
+            </div>
+            <div class="kpi-num">5.5%</div>
+            <div class="kpi-sub">Share of all inspected units</div>
+          </div>
+        </div>
+
+        <!-- MAIN DEFECT TYPE BAR CHART -->
+        <div class="card">
+          <div class="card-title">Defect types</div>
+          <div class="card-sub">
+            Count of rejected valves by damage category
+          </div>
+          <div class="bar-chart-wrap" id="defect-bar-chart"></div>
+        </div>
+
+        <!-- PARETO AND TREND SPLIT -->
+        <div class="split-grid">
+          <div class="card">
+            <div class="card-title">Pareto ranking</div>
+            <div class="card-sub">Share and cumulative contribution</div>
+            <div class="pareto-list" id="pareto-container"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Defect trend</div>
+            <div class="card-sub">Daily count for leading categories</div>
+
+            <!-- SVG Line Chart Component -->
+            <div class="svg-chart-container">
+              <svg
+                viewBox="0 0 500 200"
+                preserveAspectRatio="none"
+                id="trend-svg"
+              >
+                <!-- Grid Lines -->
+                <line
+                  x1="0"
+                  y1="40"
+                  x2="500"
+                  y2="40"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+                <line
+                  x1="0"
+                  y1="90"
+                  x2="500"
+                  y2="90"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+                <line
+                  x1="0"
+                  y1="140"
+                  x2="500"
+                  y2="140"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+
+                <!-- Smooth Bezier Lines -->
+                <path
+                  id="path-face"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-face)"
+                  stroke-width="3"
+                />
+                <path
+                  id="path-head"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-head)"
+                  stroke-width="3"
+                />
+                <path
+                  id="path-seat"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-seat)"
+                  stroke-width="3"
+                />
+                <path
+                  id="path-other"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-neck)"
+                  stroke-width="2"
+                  stroke-dasharray="4 4"
+                />
+              </svg>
+            </div>
+
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-face)"
+                ></span
+                >Face damage
+              </div>
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-head)"
+                ></span
+                >Head damage
+              </div>
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-seat)"
+                ></span
+                >Seat damage
+              </div>
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-neck)"
+                ></span
+                >All other
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: INSPECTION TAB -->
+      <div id="inspection-tab" class="tab-panel">
+        <!-- KPI STAT CARDS -->
+        <div class="kpi-row">
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">TOTAL INSPECTED</span>
+              <span class="kpi-badge badge-neutral" id="insp-kpi-total-badge"
+                >– 0%</span
+              >
+            </div>
+            <div class="kpi-num" id="insp-kpi-total">0</div>
+            <div class="kpi-sub">Units across all lines</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">ACCEPTED</span>
+              <span class="kpi-badge badge-neutral" id="insp-kpi-accepted-badge"
+                >– 0%</span
+              >
+            </div>
+            <div
+              class="kpi-num"
+              style="color: var(--color-stem)"
+              id="insp-kpi-accepted"
+            >
+              0
+            </div>
+            <div class="kpi-sub" id="insp-kpi-accepted-sub">
+              0.0% of total inspected
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">REJECTED</span>
+              <span class="kpi-badge badge-neutral" id="insp-kpi-rejected-badge"
+                >– 0%</span
+              >
+            </div>
+            <div
+              class="kpi-num"
+              style="color: var(--color-face)"
+              id="insp-kpi-rejected"
+            >
+              0
+            </div>
+            <div class="kpi-sub" id="insp-kpi-rejected-sub">
+              0.0% of total inspected
+            </div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-top">
+              <span class="kpi-label">PASS RATE</span>
+              <span class="kpi-badge badge-neutral" id="insp-kpi-pass-badge"
+                >– 0%</span
+              >
+            </div>
+            <div
+              class="kpi-num"
+              style="color: var(--color-head)"
+              id="insp-kpi-pass"
+            >
+              0.0%
+            </div>
+            <div class="kpi-sub" id="insp-kpi-pass-sub">Target 95.0%</div>
+          </div>
+        </div>
+
+        <!-- INSPECTION TREND + PASS RATE GAUGE (swapped: trend left, gauge right; trend widened) -->
+        <div class="split-grid" style="grid-template-columns: 2fr 1fr">
+          <div class="card">
+            <div class="card-title">Inspection trend</div>
+            <div class="card-sub">Accepted / rejected volume, this week</div>
+
+            <div class="svg-chart-container area-chart-container">
+              <svg
+                viewBox="0 0 500 220"
+                preserveAspectRatio="none"
+                id="area-svg"
+              >
+                <line
+                  x1="0"
+                  y1="20"
+                  x2="500"
+                  y2="20"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+                <line
+                  x1="0"
+                  y1="70"
+                  x2="500"
+                  y2="70"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+                <line
+                  x1="0"
+                  y1="120"
+                  x2="500"
+                  y2="120"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+                <line
+                  x1="0"
+                  y1="170"
+                  x2="500"
+                  y2="170"
+                  stroke="var(--card-border)"
+                  stroke-dasharray="4"
+                />
+
+                <path
+                  id="area-accepted-fill"
+                  d=""
+                  fill="var(--color-stem)"
+                  opacity="0.15"
+                  stroke="none"
+                />
+                <path
+                  id="area-accepted-line"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-stem)"
+                  stroke-width="2.5"
+                />
+                <path
+                  id="area-rejected-fill"
+                  d=""
+                  fill="var(--color-face)"
+                  opacity="0.15"
+                  stroke="none"
+                />
+                <path
+                  id="area-rejected-line"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-face)"
+                  stroke-width="2.5"
+                />
+              </svg>
+              <div class="area-chart-labels" id="area-chart-labels"></div>
+            </div>
+
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-stem)"
+                ></span
+                >Accepted
+              </div>
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-face)"
+                ></span
+                >Rejected
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Pass rate</div>
+            <div class="card-sub">Accepted vs rejected in range</div>
+
+            <div class="gauge-wrap">
+              <svg viewBox="0 0 240 140" class="gauge-svg" id="gauge-svg">
+                <path
+                  id="gauge-track"
+                  d="M 20 120 A 100 100 0 0 1 220 120"
+                  fill="none"
+                  stroke="var(--card-border)"
+                  stroke-width="16"
+                  stroke-linecap="round"
+                />
+                <path
+                  id="gauge-fill"
+                  d=""
+                  fill="none"
+                  stroke="var(--color-stem)"
+                  stroke-width="16"
+                  stroke-linecap="round"
+                />
+                <line
+                  id="gauge-needle"
+                  x1="120"
+                  y1="120"
+                  x2="120"
+                  y2="40"
+                  stroke="var(--text-primary)"
+                  stroke-width="3"
+                  stroke-linecap="round"
+                />
+                <circle cx="120" cy="120" r="6" fill="var(--text-primary)" />
+              </svg>
+              <div class="gauge-value" id="gauge-value">0.0%</div>
+              <div class="gauge-label">ACCEPT RATE</div>
+            </div>
+
+            <div class="gauge-stats">
+              <div class="gauge-stat-box">
+                <span class="gauge-stat-label">ACCEPTED</span>
+                <span
+                  class="gauge-stat-val"
+                  style="color: var(--color-stem)"
+                  id="gauge-accepted"
+                  >0</span
+                >
+              </div>
+              <div class="gauge-stat-box">
+                <span class="gauge-stat-label">REJECTED</span>
+                <span
+                  class="gauge-stat-val"
+                  style="color: var(--color-face)"
+                  id="gauge-rejected"
+                  >0</span
+                >
+              </div>
+            </div>
+
+            <div class="gauge-target-row">
+              <span>Target <strong>95%</strong></span>
+              <span id="gauge-gap">– 0.0 pts</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SHIFT-WISE SUMMARY (moved above; was below the reasons/plant split-grid) -->
+        <div class="card">
+          <div class="card-title">Shift-wise summary</div>
+          <div class="card-sub">Inspected units by shift (today)</div>
+          <div style="overflow-x: auto">
+            <table class="shift-table">
+              <thead>
+                <tr>
+                  <th>SHIFT</th>
+                  <th>WINDOW</th>
+                  <th>INSPECTED</th>
+                  <th>REJECTED</th>
+                  <th>STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="shift-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- TOP REJECTION REASONS + VOLUME BY PLANT (moved below shift-wise summary) -->
+        <div class="split-grid">
+          <div class="card">
+            <div class="card-title">Top rejection reasons</div>
+            <div class="card-sub">Share of rejected units, this week</div>
+            <div id="reason-list" class="reason-list"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">Volume by plant</div>
+            <div class="card-sub">Inspected vs rejected units, this week</div>
+            <div
+              class="bar-chart-wrap grouped-bar-wrap"
+              id="plant-bar-chart"
+            ></div>
+            <div class="chart-legend">
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-head)"
+                ></span
+                >Inspected
+              </div>
+              <div class="legend-item">
+                <span
+                  class="legend-dot"
+                  style="background: var(--color-face)"
+                ></span
+                >Rejected
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <script src="{{ url_for('static', filename='JS/dashboard.js')}}"></script>
+  </body>
+</html>

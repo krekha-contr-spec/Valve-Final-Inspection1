@@ -1,0 +1,150 @@
+{% extends "nav.html" %}
+{% block title %}Valve Specification{% endblock %}
+
+{% block content %}
+
+<style>
+    .page-title {
+        text-align: center;
+        font-size: 28px;
+        font-weight: bold;
+        margin: 25px 0;
+        color: #111827;
+    }
+
+
+    .search-box {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    .search-box input {
+        width: 320px;
+        padding: 10px 12px;
+        font-size: 16px;
+        border: 1px solid #cbd5e1;
+        border-radius: 4px;
+        color: #000;
+    }
+
+    .search-box button {
+        padding: 10px 20px;
+        font-size: 15px;
+        background: #2563eb;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    .search-box button:hover {
+        background: #1e40af;
+    }
+
+
+    .spec-table {
+        width: 50%;
+        border-collapse: collapse;
+        margin: 15px auto;
+        border: #000000 1px solid;
+
+    }
+
+    .spec-table th {
+        background: #1f2937;
+        color: #ffffff;
+        font-size: 16px;
+        padding: 12px;
+        text-align: left;
+    }
+
+    .spec-table td {
+        color: #000000;
+        padding: 10px;
+        font-size: 14px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .spec-table tr:nth-child(even) {
+        background: #f9fafb;
+    }
+
+    .no-data {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 15px;
+        color: #dc2626;
+    }
+</style>
+
+<h2 class="page-title">Valve Specifications</h2>
+
+<div class="search-box">
+    <input type="text" id="partNumber" placeholder="Enter Part Number">
+    <button onclick="loadSpecs()">Get Specs</button>
+</div>
+
+<table class="spec-table" id="specTable" style="display:none;">
+    <thead>
+        <tr>
+            <th>Parameter</th>
+            <th>Value</th>
+        </tr>
+    </thead>
+    <tbody id="specBody"></tbody>
+</table>
+
+<div id="errorMsg" class="no-data"></div>
+
+<script>
+    function loadSpecs() {
+        const part = document.getElementById("partNumber").value.trim();
+        const table = document.getElementById("specTable");
+        const body = document.getElementById("specBody");
+        const error = document.getElementById("errorMsg");
+
+        body.innerHTML = "";
+        error.textContent = "";
+        table.style.display = "none";
+
+        if (!part) {
+            error.textContent = "Please enter Part Number";
+            return;
+        }
+
+        fetch(`/api/valve-specs?part_number=${encodeURIComponent(part)}`)
+            .then(res => {
+                if (!res.ok) throw new Error("Part number not found");
+                return res.json();
+            })
+            .then(data => {
+                let hasData = false;
+
+                for (const [key, value] of Object.entries(data)) {
+                    if (value === null || value === "" || value === "null") continue;
+
+                    hasData = true;
+
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                    <td>${key}</td>
+                    <td>${value}</td>
+                `;
+                    body.appendChild(row);
+                }
+
+                if (hasData) {
+                    table.style.display = "table";
+                } else {
+                    error.textContent = "No specification data available";
+                }
+            })
+            .catch(err => {
+                error.textContent = err.message;
+            });
+    }
+</script>
+
+{% endblock %}

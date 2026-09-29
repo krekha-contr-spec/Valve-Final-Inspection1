@@ -1,0 +1,746 @@
+/* ============================================================
+   RANE VISION SYSTEM — INSPECTION DASHBOARD
+   style.css
+   Clean, professional light dashboard theme. Every class/id
+   referenced by index.html and main.js is preserved — only
+   layout, spacing, color and motion are redesigned.
+   ============================================================ */
+
+@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+:root {
+    /* -- surface -- */
+    --bg: #eef1f6;
+    --surface: #ffffff;
+    --surface-alt: #f7f9fc;
+    --border: #e1e6ee;
+    --border-strong: #cbd4e3;
+
+    /* -- brand / signal -- */
+    --navy: #000000;
+    --navy-soft: #1c3a5e;
+    --green: #0a9c46;
+    --green-soft: #e5f7ec;
+    --red: #e0333f;
+    --red-soft: #fdeaec;
+    --amber: #b8790a;
+    --amber-soft: #fdf3e2;
+    --blue: #2b6fd1;
+    --blue-soft: #eaf2fd;
+
+    /* -- text -- */
+    --text-primary: #000000;
+    --text-secondary: #5b6b82;
+    --text-muted: #8b98ab;
+
+    /* -- type -- */
+    --font-display: 'Space Grotesk', sans-serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+
+    /* -- motion -- */
+    --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    --radius: 12px;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text-primary);
+    font-family: var(--font-body);
+    min-height: 100vh;
+}
+
+.container-fluid {
+    max-width: 1800px;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.main-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 3rem;
+    letter-spacing: 0.01em;
+    margin-top: 70px;
+    position: relative;
+    padding-bottom: 0.9rem;
+    background: linear-gradient(90deg, var(--navy), var(--green), var(--blue), var(--navy));
+    background-size: 300% auto;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    color: var(--navy);
+    transform-style: preserve-3d;
+    perspective: 900px;
+    text-shadow:
+        1px 1px 0 rgba(15, 33, 55, 0.12),
+        2px 2px 0 rgba(15, 33, 55, 0.10),
+        3px 3px 0 rgba(15, 33, 55, 0.08),
+        4px 4px 6px rgba(15, 33, 55, 0.18);
+    animation: title-3d-in 0.9s var(--ease-out) both, title-color-shift 6s linear infinite,
+        title-3d-float 5s ease-in-out 0.9s infinite;
+}
+
+.main-title::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: 0;
+    transform: translateX(-50%);
+    width: 64px;
+    height: 3px;
+    border-radius: 3px;
+    background: var(--green);
+}
+
+/* ============================================================
+   FILTERS
+   ============================================================ */
+
+.filter-container {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 0.9rem 2rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.1rem 1.6rem;
+    box-shadow: 0 1px 2px rgba(15, 33, 55, 0.04);
+    animation: fade-drop 0.5s var(--ease-out) 0.06s both;
+    text-align: center;
+}
+
+.filter-container label {
+    font-family: var(--font-display) !important;
+    font-size: 1.05rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--navy) !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.45rem;
+}
+
+.filter-container label::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+}
+
+.filter-container select {
+    background: var(--surface-alt);
+    color: var(--text-primary);
+    border: 1px solid var(--border-strong);
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+    font-family: var(--font-mono);
+    font-size: 1.05rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+.filter-container select:hover,
+.filter-container select:focus {
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px var(--green-soft);
+    outline: none;
+}
+
+/* ============================================================
+   DASHBOARD GRID
+   ============================================================ */
+
+.dashboard-container {
+    display: grid;
+    grid-template-columns: minmax(0, 2.1fr) minmax(320px, 1fr);
+    gap: 1.25rem;
+    margin-top: 1.25rem;
+    align-items: start;
+}
+
+@media (max-width: 992px) {
+    .dashboard-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+.main-panel,
+.side-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+}
+
+/* ============================================================
+   SHARED CARD TREATMENT — camera-section, data-card,
+   status-card, graph-card, inspection-details
+   ============================================================ */
+
+.camera-section,
+.data-card,
+.status-card,
+.graph-card,
+.inspection-details {
+    background: linear-gradient(120deg, var(--surface) 0%, var(--surface-alt) 45%, var(--green-soft) 75%, var(--surface) 100%);
+    background-size: 260% 260%;
+    border: 1px solid var(--border);
+    border-top: 3px solid var(--green);
+    border-radius: var(--radius);
+    padding: 1.25rem;
+    box-shadow: 0 1px 3px rgba(15, 33, 55, 0.05);
+    animation: card-in 0.45s var(--ease-out) both, card-bg-shift 10s ease-in-out infinite;
+    transition: transform 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out),
+        border-color 0.2s var(--ease-out);
+}
+
+.camera-section:hover,
+.data-card:hover,
+.status-card:hover,
+.graph-card:hover,
+.inspection-details:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px -12px rgba(15, 33, 55, 0.18);
+    border-color: var(--border-strong);
+}
+
+/* stagger card entrances (delay applies to both animation-name
+   values listed above: the entrance fade AND the bg shift start) */
+.camera-section { animation-delay: 0.04s, 0.04s; }
+.data-section .data-card:nth-child(1) { animation-delay: 0.12s, 0.12s; }
+.data-section .data-card:nth-child(2) { animation-delay: 0.18s, 0.18s; }
+.status-card { animation-delay: 0.08s, 0.08s; }
+.graph-card { animation-delay: 0.16s, 0.16s; }
+.inspection-details { animation-delay: 0.24s, 0.24s; }
+
+.section-title,
+.camera-section h5,
+.status-card h3,
+.graph-card h3,
+.data-card h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--navy);
+    margin-top: 0;
+    margin-bottom: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.55rem;
+}
+
+.section-title::before,
+.camera-section h5::before,
+.status-card h3::before,
+.graph-card h3::before,
+.data-card h6::before {
+    content: "";
+    width: 4px;
+    height: 1.05em;
+    border-radius: 2px;
+    background: var(--green);
+}
+
+.status-card h3,
+.graph-card h3 {
+    font-size: 1rem;
+    text-transform: uppercase;
+}
+
+.data-card h6 {
+    font-size: 1rem;
+    text-transform: uppercase;
+    color: black;
+    font-weight: bold;
+}
+
+.data-card h6::before {
+    background: var(--blue);
+}
+
+/* ============================================================
+   CAMERA SECTION
+   ============================================================ */
+
+.camera-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1.1rem;
+}
+
+.camera-box {
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    transition: border-color 0.2s var(--ease-out), box-shadow 0.2s var(--ease-out);
+}
+
+.camera-box:hover {
+    border-color: var(--blue);
+    box-shadow: 0 4px 14px -6px rgba(43, 111, 209, 0.25);
+}
+
+.camera-feed {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    background: #0f2137;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+}
+
+.camera-box span {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: black;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+/* ============================================================
+   CONTROL BUTTONS
+   ============================================================ */
+
+.control-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.7rem;
+    margin-top: 1rem;
+}
+
+.control-buttons .btn {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.02em;
+    border: none;
+    border-radius: 8px;
+    padding: 0.55rem 1.1rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: transform 0.15s var(--ease-out), box-shadow 0.15s var(--ease-out),
+        filter 0.15s var(--ease-out);
+}
+
+.control-buttons .btn:hover {
+    transform: translateY(-1px);
+    filter: brightness(1.05);
+}
+
+.control-buttons .btn:active {
+    transform: translateY(0);
+}
+
+.btn-success#startBtn {
+    background: var(--green);
+    color: #ffffff;
+    box-shadow: 0 4px 10px -4px rgba(10, 156, 70, 0.5);
+}
+
+.btn-danger#stopBtn {
+    background: var(--red);
+    color: #ffffff;
+    box-shadow: 0 4px 10px -4px rgba(224, 51, 63, 0.45);
+}
+
+.btn-primary#uploadBtn {
+    background: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 4px 10px -4px rgba(43, 111, 209, 0.45);
+}
+
+/* ============================================================
+   LIVE DATA SECTION
+   ============================================================ */
+
+.data-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.25rem;
+}
+
+.data-card p {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 0.55rem 0;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px dashed var(--border);
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.data-card p:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.data-card p span {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--navy);
+    font-size: 0.95rem;
+}
+
+.status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.25rem 0.7rem;
+    border-radius: 20px;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.status.waiting {
+    background: var(--amber-soft);
+    color: var(--amber);
+    border: 1px solid #f2d9a6;
+}
+
+.status.waiting::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--amber);
+    animation: pulse-dot 1.6s ease-in-out infinite;
+}
+
+/* accepted / passed → green */
+.status.accepted,
+.status.pass,
+.status.passed,
+.status.ok {
+    background: var(--green-soft);
+    color: var(--green);
+    border: 1px solid #b7e6c8;
+}
+
+.status.accepted::before,
+.status.pass::before,
+.status.passed::before,
+.status.ok::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+}
+
+/* rejected / failed / stopped (this app's JS uses "stopped" for
+   rejected results) → red */
+.status.rejected,
+.status.reject,
+.status.fail,
+.status.failed,
+.status.stopped {
+    background: var(--red-soft);
+    color: var(--red);
+    border: 1px solid #f4bcc2;
+}
+
+.status.rejected::before,
+.status.reject::before,
+.status.fail::before,
+.status.failed::before,
+.status.stopped::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--red);
+}
+
+/* idle / any unrecognized other state → neutral blue-gray */
+.status.idle,
+.status.default {
+    background: var(--blue-soft);
+    color: var(--blue);
+    border: 1px solid #bfd7f7;
+}
+
+.status.idle::before,
+.status.default::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--blue);
+}
+
+/* ============================================================
+   INSPECTION STATISTICS (status-card)
+   ============================================================ */
+
+.status-boxes {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+}
+
+.status-boxes .status {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.15rem;
+    padding: 0.9rem 0.5rem;
+    border-radius: 10px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    transition: border-color 0.2s var(--ease-out), transform 0.2s var(--ease-out);
+}
+
+.status-boxes .status:hover {
+    transform: translateY(-2px);
+    border-color: var(--green);
+}
+
+.status-boxes h4 {
+    font-family: var(--font-mono);
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 0;
+    color: var(--navy);
+}
+
+#totalCount {
+    color: var(--blue);
+}
+
+#passCount {
+    color: var(--green);
+}
+
+.status-boxes h4.rejected,
+#rejectCount {
+    color: var(--red);
+}
+
+.status-boxes p {
+    margin: 0;
+    font-size: 0.72rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: black;
+    font-weight: bold;
+}
+
+/* ============================================================
+   PROGRESS BARS
+   (progress_bars.css loads after this file and may still
+   override widths/colors — these rules give sensible defaults)
+   ============================================================ */
+
+.progress-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.9rem;
+}
+
+.progress-bars label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: black;
+    margin-bottom: 0.3rem;
+    display: block;
+    font-weight: bold;
+}
+
+.bar-track {
+    position: relative;
+    width: 100%;
+    height: 18px;
+    border-radius: 20px;
+    background: var(--surface-alt);
+    border: 1px solid var(--border);
+    overflow: hidden;
+}
+
+.bar-fill {
+    height: 100%;
+    width: var(--progress, 0%);
+    border-radius: 20px;
+    background: var(--green);
+    transition: width 0.6s var(--ease-out);
+}
+
+.bar-track.reject .bar-fill {
+    background: var(--red);
+}
+
+.bar-percent {
+    position: absolute;
+    top: 50%;
+    right: 10px;
+    transform: translateY(-50%);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+    color: var(--navy);
+}
+
+/* ============================================================
+   GRAPH CARD
+   ============================================================ */
+
+.graph-card canvas {
+    width: 100% !important;
+    max-height: 260px;
+}
+
+/* ============================================================
+   INSPECTION DETAILS TABLE
+   ============================================================ */
+
+.inspection-details table {
+    margin: 0;
+    color: var(--text-primary);
+}
+
+/* hide the card completely when there's no inspection data yet,
+   instead of showing an empty box */
+.inspection-details:not(:has(table)) {
+    display: none;
+}
+
+.inspection-details th,
+.inspection-details td {
+    border-color: var(--border) !important;
+    background: transparent !important;
+    padding: 0.55rem 0.75rem;
+    font-size: 0.85rem;
+}
+
+.inspection-details th {
+    font-family: var(--font-display);
+    letter-spacing: 0.02em;
+    color: var(--text-secondary);
+    width: 40%;
+}
+
+.inspection-details td {
+    font-family: var(--font-mono);
+    font-weight: 700;
+    color: var(--navy);
+}
+
+/* ============================================================
+   ANIMATIONS
+   ============================================================ */
+
+@keyframes card-in {
+    from {
+        opacity: 0;
+        transform: translateY(12px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fade-drop {
+    from {
+        opacity: 0;
+        transform: translateY(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes title-color-shift {
+    0% { background-position: 0% 50%; }
+    100% { background-position: 300% 50%; }
+}
+
+@keyframes title-3d-in {
+    0% {
+        opacity: 0;
+        transform: perspective(900px) rotateX(-75deg) translateY(-24px);
+    }
+    60% {
+        opacity: 1;
+        transform: perspective(900px) rotateX(12deg) translateY(0);
+    }
+    100% {
+        opacity: 1;
+        transform: perspective(900px) rotateX(0deg) translateY(0);
+    }
+}
+
+@keyframes title-3d-float {
+    0%, 100% {
+        transform: perspective(900px) rotateX(0deg) rotateY(0deg) translateZ(0);
+    }
+    25% {
+        transform: perspective(900px) rotateX(4deg) rotateY(-3deg) translateZ(6px);
+    }
+    75% {
+        transform: perspective(900px) rotateX(-4deg) rotateY(3deg) translateZ(6px);
+    }
+}
+
+@keyframes card-bg-shift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+@keyframes pulse-dot {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(1.5); opacity: 0.55; }
+}
+
+/* ============================================================
+   RESPONSIVE — rem/clamp based, no px breakpoints, so layout
+   stays stable across browser zoom (100% – 75%)
+   ============================================================ */
+
+@media (max-width: 576px) {
+    .filter-container {
+        flex-direction: column;
+        align-items: center;
+    }
+    .status-boxes {
+        grid-template-columns: 1fr;
+    }
+}

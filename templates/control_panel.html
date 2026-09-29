@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hikrobot Camera Control</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, Helvetica, sans-serif;
+            background: #5ca8e6;
+            color: #ddd;
+        }
+
+        .container {
+            display: grid;
+            grid-template-columns: 260px 1fr 320px;
+            height: 100vh;
+        }
+
+        /* LEFT PANEL */
+        .left-panel {
+            background: #2a2a2a;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .panel-title {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #ffa500;
+        }
+
+        .device {
+            padding: 8px;
+            background: #333;
+            margin-bottom: 6px;
+            border-radius: 4px;
+        }
+
+        /* CENTER */
+        .center-panel {
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .center-panel img {
+            max-width: 100%;
+            max-height: 100%;
+            border: 2px solid #444;
+        }
+
+        /* RIGHT PANEL */
+        .right-panel {
+            background: #2a2a2a;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .control-group {
+            margin-bottom: 15px;
+            border-bottom: 1px solid #444;
+            padding-bottom: 10px;
+        }
+
+        .control-group h4 {
+            margin: 5px 0;
+            color: #ffa500;
+        }
+
+        label {
+            display: block;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        input[type=range],
+        select {
+            width: 100%;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 6px;
+            padding: 6px;
+            background: #444;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #666;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+
+        <!-- LEFT PANEL -->
+        <div class="left-panel">
+            <div class="panel-title">Device List</div>
+
+            <div class="device">
+                <b>GigE</b><br>
+                Ethernet [10.41.10.152]
+            </div>
+
+            <div class="device">
+                cam(02F47208356)<br>
+                IP: 10.41.10.122
+            </div>
+        </div>
+
+        <!-- CENTER IMAGE -->
+        <div class="center-panel">
+            <img src="/video_feed">
+        </div>
+
+        <!-- RIGHT PANEL -->
+        <div class="right-panel">
+
+            <div class="panel-title">Camera Controls</div>
+
+            <div class="control-group">
+                <h4>Exposure</h4>
+                <label>
+                    <input type="checkbox" onchange="toggleExposureAuto(this.checked)">
+                    Exposure Auto
+                </label>
+
+                <label>Exposure Time (µs)</label>
+                <input type="range" min="100" max="3000000" value="2000000" oninput="setExposure(this.value)">
+                <span id="expVal"></span>
+            </div>
+
+            <div class="control-group">
+                <h4>Gain</h4>
+                <label>
+                    <input type="checkbox" onchange="toggleGainAuto(this.checked)">
+                    Gain Auto
+                </label>
+
+                <label>Gain (dB)</label>
+                <input type="range" min="0" max="20" step="0.1" oninput="setGain(this.value)">
+                <span id="gainVal"></span>
+            </div>
+
+            <div class="control-group">
+                <h4>Trigger</h4>
+                <button onclick="enableTrigger()">Enable Trigger</button>
+                <button onclick="disableTrigger()">Disable Trigger</button>
+                <button onclick="triggerOnce()">Software Trigger</button>
+            </div>
+
+            <div class="control-group">
+                <h4>ROI</h4>
+                <label>Width</label>
+                <input type="number" value="2448" onchange="setROI()" id="width">
+
+                <label>Height</label>
+                <input type="number" value="2048" onchange="setROI()" id="height">
+            </div>
+
+            <div class="control-group">
+                <h4>Pixel Format</h4>
+                <select onchange="setPixelFormat(this.value)">
+                    <option value="BayerRG8">Bayer RG8</option>
+                    <option value="Mono8">Mono8</option>
+                    <option value="RGB8">RGB8</option>
+                </select>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function setExposure(val) {
+            document.getElementById("expVal").innerText = val;
+            fetch("/set_exposure", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value: val })
+            });
+        }
+
+        function setGain(val) {
+            document.getElementById("gainVal").innerText = val;
+            fetch("/set_gain", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ value: val })
+            });
+        }
+
+        function toggleExposureAuto(enable) {
+            fetch("/exposure_auto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enable: enable })
+            });
+        }
+
+        function toggleGainAuto(enable) {
+            fetch("/gain_auto", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enable: enable })
+            });
+        }
+
+        function enableTrigger() {
+            fetch("/trigger_mode", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enable: true })
+            });
+        }
+
+        function disableTrigger() {
+            fetch("/trigger_mode", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ enable: false })
+            });
+        }
+
+        function triggerOnce() {
+            fetch("/trigger_once", { method: "POST" });
+        }
+
+        function setROI() {
+            fetch("/set_roi", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    width: document.getElementById("width").value,
+                    height: document.getElementById("height").value
+                })
+            });
+        }
+
+        function setPixelFormat(fmt) {
+            fetch("/set_pixel_format", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ format: fmt })
+            });
+        }
+    </script>
+
+</body>
+
+</html>

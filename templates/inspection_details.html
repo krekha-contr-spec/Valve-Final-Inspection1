@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Inspection Details</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/inspection_details.css') }}">
+    <style>
+        
+        .image-label {
+            margin-top: 8px;
+            font-size: 18px;
+            color: purple;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+
+<body>
+<div class="container mt-0 py-1">
+    <div class="card shadow-sm custom-card">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-3 text-primary">Inspection Details</h2>
+             
+            <table class="table table-bordered table-striped mb-4">
+                <tbody>
+                    <tr>
+                        <th scope="row">Part Number :</th>
+                        <td><span class="text-success">{{ inspection.part_number }}</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Result :</th>
+                            <td class="{% if inspection.result == 'Accepted' %}text-accepted{% else %}text-rejected{% endif %}">
+                                {{ inspection.result }}
+                            </td>
+                        </th>
+                    </tr>
+
+                    <tr>
+                        <th scope="row">Image Name :</th>
+                        <td><span class="text-warning">{{ inspection.image_name }}</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Defect Type :</th>
+                        <td><span class="text-warning">{{ inspection.defect_type }}</span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row">Timestamp :</th>
+                        <td><span class="text-muted">{{ inspection.timestamp }}</span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="row text-center images">
+                <!-- Test Image -->
+                <div class="col-md-6 mb-3">
+                    <h5>Test Image</h5>
+                    {% set test_image = inspection.image_name %}
+                    {% if test_image and not (test_image.endswith('.png') or test_image.endswith('.jpg') or test_image.endswith('.jpeg')) %}
+                        {% set test_image = test_image ~ '.jpg' %}
+                    {% endif %}
+                    {% if test_image %}
+                        <img src="{{ url_for('static', filename='uploads/' ~ test_image) }}" alt="Test Image">
+                        <div class="image-label"> {{ test_image.rsplit('.', 1)[0] }}</div>
+                    {% else %}
+                        <p style="color: gray;">No test image available</p>
+                    {% endif %}
+                </div>
+
+                <!-- Trained Image -->
+                <div class="col-md-6 mb-3">
+                    <h5>Trained Image</h5>
+                    {% set trained_image = inspection.trained_image %}
+                    {% if trained_image and not (trained_image.endswith('.png') or trained_image.endswith('.jpg') or trained_image.endswith('.jpeg')) %}
+                        {% set trained_image = trained_image ~ '.jpg' %}
+                    {% endif %}
+                    {% if trained_image %}
+                        <img src="{{ url_for('static', filename='golden_library/' ~ inspection.part_number ~ '/' ~ trained_image) }}" alt="Trained Image">
+                        <div class="image-label">{{ trained_image }}</div>
+                    {% else %}
+                        <p style="color: gray;">No trained image available</p>
+                    {% endif %}
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
+

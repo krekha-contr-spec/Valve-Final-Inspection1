@@ -1,0 +1,498 @@
+{% extends "nav.html" %}
+{% block title %}Report{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='CSS/report.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="report-page-wrap">
+  <div class="report-container" id="report-container">
+    <span class="reg-mark tl"></span>
+    <span class="reg-mark tr"></span>
+    <span class="reg-mark bl"></span>
+    <span class="reg-mark br"></span>
+
+    <div class="report-header">
+      <div class="heading-block">
+        <p class="eyebrow">QC Inspection Traveler</p>
+        <h2>Inspection Report</h2>
+      </div>
+      <div class="report-actions">
+        <button id="download-report-btn" class="download-report-btn" type="button" title="Download this inspection report as PDF">
+          <span class="download-icon">↓</span>
+          <span id="download-report-text">Download PDF</span>
+        </button>
+        <div class="report-id-badge">
+          <span id="live-indicator" class="live-badge"><span class="dot"></span>Live</span>
+          RECORD ID
+          <strong id="report-id-display">—</strong>
+        </div>
+      </div>
+    </div>
+
+    <div id="loading" class="report-notice loading">Loading report…</div>
+
+    <div id="not-found" class="report-notice not-found" style="display: none">
+      <div class="notice-title">Report not found</div>
+      <p id="not-found-message">No inspection record exists for this ID yet.</p>
+      <button class="notice-btn" id="retry-btn" type="button">Retry</button>
+    </div>
+
+    <div id="error" class="report-notice error" style="display: none">
+      <div class="notice-title">Couldn't load report</div>
+      <p id="error-message"></p>
+      <button class="notice-btn" id="retry-btn-error" type="button">Retry</button>
+    </div>
+
+    <div id="report-content" style="display: none">
+      <section class="report-section">
+        <div class="section-title">Inspection Information</div>
+        <div class="report-fields" id="report-info"></div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-title">Component Details</div>
+        <div class="report-fields" id="component-info"></div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-title">Defect Details</div>
+        <table class="report-table">
+          <thead>
+            <tr>
+              <th>Sl.No</th>
+              <th>Defect Type</th>
+              <th>Defect Location</th>
+              <th>Camera No</th>
+              <th>Image</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody id="defect-table-body"></tbody>
+        </table>
+
+        <div class="report-summary">
+          <div class="summary-card summary-total">
+            <h3 id="summary-inspected">0</h3>
+            <p>Total Inspected</p>
+          </div>
+          <div class="summary-card summary-rejected">
+            <h3 id="summary-rejected">0</h3>
+            <p>Rejected</p>
+          </div>
+          <div class="summary-card summary-errors">
+            <h3 id="summary-errors">0</h3>
+            <p>Errors</p>
+          </div>
+          <div class="summary-card summary-accepted">
+            <h3 id="summary-accepted">0</h3>
+            <p>Accepted</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-title">
+          Images
+          <span id="image-count-badge" class="image-count-badge"></span>
+        </div>
+        <div id="images-gallery" class="images-gallery">
+          <span class="empty-note">No images available</span>
+        </div>
+      </section>
+
+      <section class="report-section" id="corrective-section" style="display: none">
+        <div class="section-title">Root Cause &amp; Corrective Action</div>
+        <div class="report-fields" id="corrective-info"></div>
+      </section>
+
+      <section class="report-section">
+        <div class="section-title">Final Status</div>
+        <div class="final-status-grid">
+          <div id="decision-stamp" class="decision-stamp" style="display: none"></div>
+          <div class="report-fields" id="final-status-info" style="grid-column: 1 / -1"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  const API_URL = "/api/report/data";
+  const LIVE_API_URL = "/api/report/live";
+  const LIVE_POLL_MS = 2000;
+  const LIVE_POLL_MS_ERROR = 4000;
+  let pollTimer = null;
+
+  function getId() {
+    const searchId = new URLSearchParams(window.location.search).get("id");
+    if (searchId) {
+      return searchId;
+    }
+    const pathMatch = window.location.pathname.match(/\/report\/(\d+)/);
+    return pathMatch ? pathMatch[1] : null;
+  }
+
+  function isLiveMode() {
+    if (
+      window.location.pathname.endsWith("/live") ||
+      new URLSearchParams(window.location.search).get("live") === "true"
+    ) {
+      return true;
+    }
+    // No specific record ID anywhere in the URL (e.g. plain "/report") -
+    // default to the live view instead of silently falling back to
+    // record #1.
+    return !getId();
+  }
+
+  function schedulePoll(delayMs) {
+    clearTimeout(pollTimer);
+    pollTimer = setTimeout(loadReport, delayMs);
+  }
+
+  function setLiveIndicator(on) {
+    document.getElementById("live-indicator").classList.toggle("on", !!on);
+  }
+
+  async function downloadInspectionPDF() {
+    const button = document.getElementById("download-report-btn");
+    const text = document.getElementById("download-report-text");
+
+    if (isLiveMode()) {
+      alert("Download is available after the inspection record is completed.");
+      return;
+    }
+
+    const id = getId();
+    if (!id) {
+      alert("Inspection record ID is missing.");
+      return;
+    }
+
+    button.disabled = true;
+    text.textContent = "Generating...";
+
+    try {
+      const response = await fetch(`/api/report/download?id=${encodeURIComponent(id)}`);
+
+      if (!response.ok) {
+        let message = "Unable to generate PDF.";
+        try {
+          const body = await response.json();
+          message = body.error || message;
+        } catch (_) {}
+        throw new Error(message);
+      }
+
+      const blob = await response.blob();
+      const disposition = response.headers.get("Content-Disposition") || "";
+      const match = disposition.match(/filename="?([^"]+)"?/i);
+      const filename = match ? match[1] : `Inspection_Report_${id}.pdf`;
+
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("PDF download failed:", error);
+      alert(error.message || "PDF download failed.");
+    } finally {
+      button.disabled = false;
+      text.textContent = "Download PDF";
+    }
+  }
+
+  function showState(state, message) {
+    document.getElementById("loading").style.display = state === "loading" ? "block" : "none";
+    document.getElementById("not-found").style.display = state === "not-found" ? "block" : "none";
+    document.getElementById("error").style.display = state === "error" ? "block" : "none";
+    document.getElementById("report-content").style.display = state === "content" ? "block" : "none";
+
+    if (state === "not-found") {
+      document.getElementById("not-found-message").textContent =
+        message || "No inspection record exists for this ID yet.";
+    }
+    if (state === "error") {
+      document.getElementById("error-message").textContent =
+        message || "Something went wrong while loading this report.";
+    }
+  }
+
+  async function loadReport() {
+    const live = isLiveMode();
+    const id = live ? null : getId();
+    const alreadyShowingContent =
+      document.getElementById("report-content").style.display === "block";
+
+    if (!live) {
+      document.getElementById("report-id-display").textContent = `#${id}`;
+    }
+    // In live mode, once content is showing, refresh quietly in the
+    // background instead of flashing the loading screen on every poll.
+    if (!live || !alreadyShowingContent) {
+      showState("loading");
+    }
+
+    try {
+      const url = live ? LIVE_API_URL : `${API_URL}?id=${id}`;
+      const response = await fetch(url);
+
+      if (response.status === 404) {
+        if (live) {
+          setLiveIndicator(false);
+          if (!alreadyShowingContent) {
+            showState(
+              "not-found",
+              "No inspection is currently running. Start an inspection to see live results here.",
+            );
+          }
+          schedulePoll(LIVE_POLL_MS_ERROR);
+          return;
+        }
+        showState(
+          "not-found",
+          `There's no inspection record for ID ${id}. Check the ID in the URL, or confirm this record has been created on the server.`,
+        );
+        return;
+      }
+
+      if (!response.ok) {
+        let detail = "";
+        try {
+          const body = await response.text();
+          detail = body ? `: ${body}` : "";
+        } catch (_) {}
+        throw new Error(`API Error ${response.status}${detail}`);
+      }
+
+      const data = await response.json();
+      renderReport(data);
+      showState("content");
+
+      if (live) {
+        document.getElementById("report-id-display").textContent =
+          data.reportId ? `${data.reportId}` : "LIVE";
+        setLiveIndicator(data.isLive !== false);
+        schedulePoll(LIVE_POLL_MS);
+      }
+    } catch (err) {
+      console.error(err);
+      if (live) {
+        setLiveIndicator(false);
+        if (!alreadyShowingContent) {
+          showState("error", err.message || "Failed to load live report.");
+        }
+        schedulePoll(LIVE_POLL_MS_ERROR);
+        return;
+      }
+      showState("error", err.message || "Failed to load report.");
+    }
+  }
+
+  function renderField(id, value) {
+    document.getElementById(id).textContent = value || "-";
+  }
+
+  // Fields with no real content shouldn't take up space in the report -
+  // this treats "", null, undefined and "-" placeholders as empty, but
+  // keeps numbers (including 0) since a quantity of 0 is still meaningful.
+  function isEmptyValue(value) {
+    return value === undefined || value === null || value === "" || value === "-";
+  }
+
+  function renderFieldCards(containerId, items) {
+    const container = document.getElementById(containerId);
+    const filled = items.filter((item) => !isEmptyValue(item.value));
+    container.innerHTML = filled
+      .map(
+        (item) => `
+      <div class="field-card">
+        <strong>${item.label}</strong>
+        <span>${item.value}</span>
+      </div>
+    `,
+      )
+      .join("");
+    return filled;
+  }
+
+  // Shift A: 06:30-14:30, Shift B: 14:30-22:30, Shift C: 22:30-06:30 (overnight)
+  function computeShift(dateValue) {
+    if (isEmptyValue(dateValue)) return null;
+
+    const raw = String(dateValue).trim();
+    // Expecting "YYYY-MM-DD HH:MM:SS" (or with a "T" separator); pull out
+    // just the time portion rather than trusting Date parsing of odd formats.
+    const match = raw.match(/(\d{1,2}):(\d{2})(?::(\d{2}))?\s*$/);
+    if (!match) return null;
+
+    const hours = parseInt(match[1], 10);
+    const minutes = parseInt(match[2], 10);
+    if (Number.isNaN(hours) || Number.isNaN(minutes)) return null;
+
+    const minutesOfDay = hours * 60 + minutes;
+    const shiftAStart = 6 * 60 + 30; // 06:30
+    const shiftBStart = 14 * 60 + 30; // 14:30
+    const shiftCStart = 22 * 60 + 30; // 22:30
+
+    if (minutesOfDay >= shiftAStart && minutesOfDay < shiftBStart) return "Shift A";
+    if (minutesOfDay >= shiftBStart && minutesOfDay < shiftCStart) return "Shift B";
+    return "Shift C";
+  }
+
+  function renderImageGallery(defects, fallbackImages) {
+    const gallery = document.getElementById("images-gallery");
+    const countBadge = document.getElementById("image-count-badge");
+
+    // Prefer per-defect images (so each thumbnail can be labelled), but fall
+    // back to a plain image list if that's all the API returned.
+    let items = defects
+      .map((d, i) => ({
+        src: d.image,
+        label: d.type || d.camera || `Image ${i + 1}`,
+        status: (d.status || "").toUpperCase(),
+      }))
+      .filter((item) => item.src);
+
+    if (items.length === 0 && Array.isArray(fallbackImages)) {
+      items = fallbackImages.map((src, i) => ({
+        src,
+        label: `Image ${i + 1}`,
+        status: "",
+      }));
+    }
+
+    countBadge.textContent = items.length ? `(${items.length})` : "";
+
+    if (items.length === 0) {
+      gallery.innerHTML = `<span class="empty-note">No images available</span>`;
+      return;
+    }
+
+    gallery.innerHTML = items
+      .map((item, i) => {
+        const statusClass =
+          item.status === "OK"
+            ? "thumb-ok"
+            : item.status
+              ? "thumb-ng"
+              : "";
+        return `
+      <div class="image-thumb ${statusClass}">
+        <img src="${item.src}" alt="${item.label || `Defect image ${i + 1}`}" loading="lazy" />
+        <div class="image-thumb-label">${item.label || `Image ${i + 1}`}</div>
+      </div>
+    `;
+      })
+      .join("");
+  }
+
+  function renderReport(data) {
+    const infoItems = [
+      { label: "Customer Name", value: data.customer },
+      { label: "Part Number", value: data.partNo },
+      { label: "Part Name", value: data.partName },
+      { label: "Batch / Lot No", value: data.batch },
+      { label: "Inspection Date", value: data.date },
+      { label: "Shift", value: computeShift(data.date) },
+      { label: "Inspector", value: data.inspector },
+      { label: "Machine / Camera ID", value: data.machineId },
+      { label: "Inspection Type", value: data.inspectionType },
+    ];
+    renderFieldCards("report-info", infoItems);
+
+    const componentItems = [
+      { label: "Component Type", value: data.componentType },
+      { label: "Material", value: data.material },
+      { label: "Size / Diameter", value: data.size },
+      { label: "Surface Finish", value: data.surfaceFinish },
+      { label: "Quantity Inspected", value: data.qtyInspected ?? 0 },
+      { label: "Quantity Rejected", value: data.qtyRejected ?? 0 },
+      { label: "Quantity Errors", value: data.qtyErrors ?? 0 },
+      { label: "Quantity Accepted", value: data.qtyAccepted ?? 0 },
+    ];
+    renderFieldCards("component-info", componentItems);
+
+    const defects = Array.isArray(data.defects) ? data.defects : [];
+    const defectTableBody = document.getElementById("defect-table-body");
+    defectTableBody.innerHTML =
+      defects.length === 0
+        ? `<tr><td colspan="6">No defects found</td></tr>`
+        : defects
+            .map(
+              (item, index) => `
+        <tr>
+          <td>${index + 1}</td>
+          <td>${item.type || "-"}</td>
+          <td>${item.location || "-"}</td>
+          <td>${item.camera || "-"}</td>
+          <td>${item.image ? `<img src="${item.image}" alt="Defect" style="max-width:144px; max-height:96px; border-radius:3px;" />` : "-"}</td>
+          <td><span class="${item.isError ? "status-error" : item.status === "OK" ? "status-ok" : "status-ng"}">${item.status || "-"}</span></td>
+        </tr>
+      `,
+            )
+            .join("");
+
+    const inspected = data.qtyInspected ?? 0;
+    const rejected = data.qtyRejected ?? 0;
+    const errors = data.qtyErrors ?? 0;
+    const accepted = data.qtyAccepted ?? Math.max(0, inspected - rejected - errors);
+
+    document.getElementById("summary-inspected").textContent = inspected;
+    document.getElementById("summary-rejected").textContent = rejected;
+    document.getElementById("summary-errors").textContent = errors;
+    document.getElementById("summary-accepted").textContent = accepted;
+
+    renderImageGallery(defects, data.images);
+
+    // Root Cause & Corrective Action - hide the whole section if nothing
+    // in it is filled in, rather than showing a block of empty labels.
+    const correctiveItems = [
+      { label: "Root Cause", value: data.rootCause },
+      { label: "Immediate Action", value: data.immediateAction },
+      { label: "Preventive Action", value: data.preventiveAction },
+      { label: "Responsible Dept", value: data.responsibleDept },
+      { label: "Target Date", value: data.targetDate },
+    ];
+    const correctiveFilled = renderFieldCards("corrective-info", correctiveItems);
+    document.getElementById("corrective-section").style.display =
+      correctiveFilled.length === 0 ? "none" : "";
+
+    const finalDecision =
+      data.finalDecision ||
+      (rejected > 0 ? "Rejected" : errors > 0 && accepted === 0 ? "Error" : "Accepted");
+
+    // Final Decision / Rework / Scrap are always meaningful (they default
+    // to a real value rather than being genuinely unfilled) - only Approved
+    // By drops out when it's actually empty.
+    const finalStatusItems = [
+      { label: "Final Decision", value: finalDecision },
+      { label: "Rework Required", value: data.reworkRequired ? "YES" : "NO" },
+      { label: "Scrap", value: data.scrap ? "YES" : "NO" },
+      { label: "Approved By", value: data.approvedBy },
+    ];
+    renderFieldCards("final-status-info", finalStatusItems);
+
+    const stampEl = document.getElementById("decision-stamp");
+    const isPass = /^accept/i.test(finalDecision);
+    const isError = /error/i.test(finalDecision);
+    stampEl.textContent = isPass ? "Accepted" : isError ? "Error" : "Rejected";
+    stampEl.className = `decision-stamp ${isPass ? "stamp-pass" : isError ? "stamp-error" : "stamp-fail"}`;
+    stampEl.style.display = "block";
+  }
+
+  document.getElementById("retry-btn").addEventListener("click", loadReport);
+  document.getElementById("retry-btn-error").addEventListener("click", loadReport);
+
+  document.getElementById("download-report-btn")?.addEventListener("click", downloadInspectionPDF);
+
+  loadReport();
+</script>
+{% endblock %}

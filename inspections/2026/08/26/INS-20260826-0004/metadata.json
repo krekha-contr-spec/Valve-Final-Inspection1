@@ -1,0 +1,86 @@
+{
+  "inspection_id": "INS-20260826-0004",
+  "valve_type": "Check Valve",
+  "required_images": 6,
+  "positions": [
+    "Front",
+    "Back",
+    "Top",
+    "Bottom",
+    "Inlet",
+    "Outlet"
+  ],
+  "operator": "Operator",
+  "start_time": "2026-08-26T17:15:35.715727",
+  "end_time": null,
+  "status": "INSPECTION_STARTED",
+  "final_result": "PENDING",
+  "captured_images": [
+    {
+      "image_id": "IMG_CAM-01_FRONT_20260826_171535_7",
+      "inspection_id": "INS-20260826-0004",
+      "camera_id": "CAM-01",
+      "image_position": "Front",
+      "file_path": "inspections/2026/08/26/INS-20260826-0004/cam_01/IMG_CAM-01_FRONT_20260826_171535_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0004\\cam_01\\IMG_CAM-01_FRONT_20260826_171535_7.jpg",
+      "timestamp": "2026-08-26T17:15:35.718138",
+      "width": 100,
+      "height": 100,
+      "image_hash": "b379ba55db00e273732783636a79c9d0",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_CAM-01_BACK_20260826_171535_7",
+      "inspection_id": "INS-20260826-0004",
+      "camera_id": "CAM-01",
+      "image_position": "Back",
+      "file_path": "inspections/2026/08/26/INS-20260826-0004/cam_01/IMG_CAM-01_BACK_20260826_171535_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0004\\cam_01\\IMG_CAM-01_BACK_20260826_171535_7.jpg",
+      "timestamp": "2026-08-26T17:15:35.722053",
+      "width": 100,
+      "height": 100,
+      "image_hash": "1edf0d00cf5e3fefb8c3cd2b28bab1e1",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_CAM-01_TOP_20260826_171535_7",
+      "inspection_id": "INS-20260826-0004",
+      "camera_id": "CAM-01",
+      "image_position": "Top",
+      "file_path": "inspections/2026/08/26/INS-20260826-0004/cam_01/IMG_CAM-01_TOP_20260826_171535_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0004\\cam_01\\IMG_CAM-01_TOP_20260826_171535_7.jpg",
+      "timestamp": "2026-08-26T17:15:35.724798",
+      "width": 100,
+      "height": 100,
+      "image_hash": "f39cc1815dda1fb6b548e70e59af4cdf",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_CAM-01_BOTTOM_20260826_171535_7",
+      "inspection_id": "INS-20260826-0004",
+      "camera_id": "CAM-01",
+      "image_position": "Bottom",
+      "file_path": "inspections/2026/08/26/INS-20260826-0004/cam_01/IMG_CAM-01_BOTTOM_20260826_171535_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0004\\cam_01\\IMG_CAM-01_BOTTOM_20260826_171535_7.jpg",
+      "timestamp": "2026-08-26T17:15:35.727386",
+      "width": 100,
+      "height": 100,
+      "image_hash": "d1db77693d9d24bae402035eae73505d",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_CAM-01_INLET_20260826_171535_7",
+      "inspection_id": "INS-20260826-0004",
+      "camera_id": "CAM-01",
+      "image_position": "Inlet",
+      "file_path": "inspections/2026/08/26/INS-20260826-0004/cam_01/IMG_CAM-01_INLET_20260826_171535_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0004\\cam_01\\IMG_CAM-01_INLET_20260826_171535_7.jpg",
+      "timestamp": "2026-08-26T17:15:35.729978",
+      "width": 100,
+      "height": 100,
+      "image_hash": "9939d55a3d1f91c7f92c4acabea7b9ca",
+      "status": "VALID"
+    }
+  ],
+  "defects": []
+}

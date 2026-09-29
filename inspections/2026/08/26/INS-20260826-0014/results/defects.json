@@ -1,0 +1,44 @@
+[
+  {
+    "image_id": "IMG_cam1_FRONT_20260826_172014_4",
+    "camera_id": "cam1",
+    "position": "Front",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_BACK_20260826_172014_7",
+    "camera_id": "cam1",
+    "position": "Back",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_TOP_20260826_172015_0",
+    "camera_id": "cam1",
+    "position": "Top",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_BOTTOM_20260826_172015_2",
+    "camera_id": "cam1",
+    "position": "Bottom",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_INLET_20260826_172015_5",
+    "camera_id": "cam1",
+    "position": "Inlet",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_OUTLET_20260826_172015_7",
+    "camera_id": "cam1",
+    "position": "Outlet",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  }
+]

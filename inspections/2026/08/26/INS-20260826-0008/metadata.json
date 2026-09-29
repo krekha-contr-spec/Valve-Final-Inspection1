@@ -1,0 +1,33 @@
+{
+  "inspection_id": "INS-20260826-0008",
+  "valve_type": "Ball Valve",
+  "required_images": 5,
+  "positions": [
+    "Front",
+    "Back",
+    "Side",
+    "Top",
+    "Bottom"
+  ],
+  "operator": "Operator",
+  "start_time": "2026-08-26T17:16:02.060579",
+  "end_time": null,
+  "status": "INSPECTION_STARTED",
+  "final_result": "PENDING",
+  "captured_images": [
+    {
+      "image_id": "IMG_CAM-01_FRONT_20260826_171602_0",
+      "inspection_id": "INS-20260826-0008",
+      "camera_id": "CAM-01",
+      "image_position": "Front",
+      "file_path": "inspections/2026/08/26/INS-20260826-0008/cam_01/IMG_CAM-01_FRONT_20260826_171602_0.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0008\\cam_01\\IMG_CAM-01_FRONT_20260826_171602_0.jpg",
+      "timestamp": "2026-08-26T17:16:02.062888",
+      "width": 100,
+      "height": 100,
+      "image_hash": "5dcf1bf376a38cb640d9dac412444cc4",
+      "status": "VALID"
+    }
+  ],
+  "defects": []
+}

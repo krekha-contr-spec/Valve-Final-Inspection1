@@ -1,0 +1,878 @@
+<!DOCTYPE html>
+{% extends "nav.html" %}
+{% block title %}Valve Inspection Dashboard{% endblock %}
+{% block extra_css %}
+    <link rel="icon" type="image/jpeg" href="{{ url_for('static', filename='dashboard.png') }}" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/style.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/progress_bars.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        #page-shortcut-toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(20px);
+            background: #212529;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.15s ease, transform 0.15s ease;
+            z-index: 2000;
+        }
+        #page-shortcut-toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        /* =========================================================
+           LAYOUT-ONLY OVERRIDES
+           Rearranges Camera Cards into one responsive row, and
+           Inspection Statistics / Live Reading / Shift-wise Report /
+           Reference Data into a second responsive row (4 / 2 / 1).
+           No IDs, classes, JS hooks, or Jinja logic are changed —
+           only layout, spacing and motion.
+           ========================================================= */
+
+        .dashboard-container {
+            display: block !important;
+        }
+
+        .main-panel,
+        .side-panel {
+            width: 100% !important;
+            max-width: none !important;
+            float: none !important;
+        }
+
+        /* ---------- Row 1: Camera Cards ---------- */
+        .camera-section {
+            width: 100%;
+            margin-bottom: 1.5rem;
+        }
+
+        .camera-grid {
+            display: grid !important;
+            grid-template-columns: repeat(3, 1fr) !important;
+            gap: 16px !important;
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .camera-box {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 10px;
+            width: 100%;
+            box-sizing: border-box;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: cardRise 0.5s ease forwards;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .camera-box:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+        }
+
+        .camera-box .camera-feed {
+            width: 100%;
+            height: auto;
+            aspect-ratio: 4 / 3;
+            object-fit: cover;
+            border-radius: 8px;
+            background: #0d0d0d;
+        }
+
+        .camera-box:nth-of-type(1) { animation-delay: 0.05s; }
+        .camera-box:nth-of-type(2) { animation-delay: 0.15s; }
+        .camera-box:nth-of-type(3) { animation-delay: 0.25s; }
+
+        .control-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 1rem;
+        }
+
+        .control-buttons .btn {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .control-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        .control-buttons .btn:active {
+            transform: translateY(0);
+        }
+
+        /* ---------- Row 2: Stat / Info Cards ----------
+           Inspection Statistics, Live Reading,
+           Shift-wise Inspection Report, Reference Data */
+        .cards-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            align-items: stretch;
+            width: 100%;
+            margin-top: 0.5rem;
+        }
+
+        .cards-row > .status-card,
+        .cards-row > .data-card,
+        .cards-row > .graph-card {
+            width: 100%;
+            margin: 0;
+            box-sizing: border-box;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: cardRise 0.5s ease forwards;
+            transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+
+        .cards-row > .status-card:hover,
+        .cards-row > .data-card:hover,
+        .cards-row > .graph-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 24px rgba(0, 0, 0, 0.14);
+        }
+
+        .cards-row > *:nth-child(1) { animation-delay: 0.05s; }
+        .cards-row > *:nth-child(2) { animation-delay: 0.15s; }
+        .cards-row > *:nth-child(3) { animation-delay: 0.25s; }
+        .cards-row > *:nth-child(4) { animation-delay: 0.35s; }
+
+        .graph-card canvas {
+            width: 100% !important;
+            max-height: 220px;
+        }
+
+        .status-boxes {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .status-boxes .status {
+            flex: 1 1 0;
+            min-width: 60px;
+        }
+
+        /* Live status pulse (subtle, respects reduced motion below) */
+        #liveStatus.waiting {
+            display: inline-block;
+        }
+
+        .status.waiting,
+        #liveStatus.waiting {
+            animation: statusPulse 1.8s ease-in-out infinite;
+        }
+
+        /* ---------- Inspection details table ---------- */
+        #inspectionDetailsSection {
+            width: 100%;
+            margin-top: 1.5rem;
+            opacity: 0;
+            transform: translateY(16px);
+            animation: cardRise 0.5s ease forwards;
+            animation-delay: 0.4s;
+        }
+
+        /* ---------- Keyframes ---------- */
+        @keyframes cardRise {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes statusPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.55; }
+        }
+
+        /* ---------- Responsive breakpoints ---------- */
+        /* Tablet: cards row -> 2 columns; camera row stays 3-up but tightens */
+        @media (max-width: 1199.98px) {
+            .cards-row {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 991.98px) {
+            .camera-grid {
+                grid-template-columns: repeat(3, 1fr) !important;
+                gap: 12px !important;
+            }
+        }
+
+        /* Mobile: everything stacks to a single column */
+        @media (max-width: 767.98px) {
+            .camera-grid {
+                grid-template-columns: 1fr !important;
+            }
+
+            .cards-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filter-container {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+
+        @media (max-width: 575.98px) {
+            .camera-box .camera-feed {
+                aspect-ratio: 16 / 10;
+            }
+
+            .control-buttons {
+                flex-direction: column;
+            }
+
+            .control-buttons .btn {
+                width: 100%;
+            }
+        }
+
+        /* ---------- Big live result stamp ---------- */
+        #resultStamp {
+            position: fixed;
+            top: 110px;
+            right: 40px;
+            z-index: 1500;
+            padding: 18px 36px;
+            font-size: 2.6rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            border: 7px solid;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.92);
+            pointer-events: none;
+            opacity: 0;
+            transform: rotate(-10deg) scale(0.85);
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        #resultStamp.show {
+            opacity: 1;
+            animation: stampPop 0.35s ease forwards;
+        }
+
+        #resultStamp.accepted {
+            color: #0d8a3e;
+            border-color: #0d8a3e;
+            box-shadow: 0 0 24px rgba(13, 138, 62, 0.35);
+        }
+
+        #resultStamp.rejected {
+            color: #d32f2f;
+            border-color: #d32f2f;
+            box-shadow: 0 0 24px rgba(211, 47, 47, 0.35);
+        }
+
+        @keyframes stampPop {
+            0%   { opacity: 0; transform: rotate(-10deg) scale(0.6); }
+            60%  { opacity: 1; transform: rotate(-10deg) scale(1.08); }
+            100% { opacity: 1; transform: rotate(-10deg) scale(1); }
+        }
+
+        @media (max-width: 767.98px) {
+            #resultStamp {
+                top: auto;
+                bottom: 90px;
+                right: 50%;
+                transform: translateX(50%) rotate(-8deg) scale(0.85);
+                font-size: 1.6rem;
+                padding: 10px 20px;
+            }
+
+            #resultStamp.show {
+                transform: translateX(50%) rotate(-8deg) scale(1);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            #resultStamp {
+                transition: opacity 0.15s ease;
+            }
+
+            #resultStamp.show {
+                animation: none;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .camera-box,
+            .cards-row > .status-card,
+            .cards-row > .data-card,
+            .cards-row > .graph-card,
+            #inspectionDetailsSection {
+                animation: none;
+                opacity: 1;
+                transform: none;
+            }
+
+            .status.waiting,
+            #liveStatus.waiting {
+                animation: none;
+            }
+
+            .camera-box:hover,
+            .cards-row > .status-card:hover,
+            .cards-row > .data-card:hover,
+            .cards-row > .graph-card:hover,
+            .control-buttons .btn:hover {
+                transform: none;
+            }
+        }
+    </style>
+{% endblock %}
+{% block content %}
+<div class="container-fluid py-3">
+
+    <!-- HEADER -->
+    <h1 class="main-title text-center mb-4">     
+        Vision System for Valve Final Inspection
+    </h1>
+
+    <!-- FILTERS -->
+    <div class="filter-container mb-3">
+        <label for="partNumberFilter"
+            style="color:#08CB00;font-weight:bold;font-size:20px;">
+            Part Number :
+        </label>
+
+        <select id="partNumberFilter" name="part_number">
+            <option value="46152">46152</option>
+            <option value="46157">46157</option>
+            <option value="48290">48290</option>
+            <option value="48295">48295</option>
+            <option value="48460">48460</option>
+            <option value="48465">48465</option>
+            <option value="49020">49020</option>
+        </select>
+        <label for="locationFilter"
+            style="color:#08CB00;font-weight:bold;font-size:20px;">
+            Location :
+        </label>
+
+        <select id="locationFilter" name="location">
+            <option value="P2">P2</option>
+            <option value="P3">P3</option>
+            <option value="P4">P4</option>
+            <option value="P5">P5</option>
+            <option value="P6">P6</option>
+        </select>
+
+        <label for="shiftFilter"
+            style="color:#08CB00;font-weight:bold;font-size:20px;">
+            Shift :
+        </label>
+
+        <select id="shiftFilter" name="shift">
+            <option value="ShiftA">Shift A</option>
+            <option value="ShiftB">Shift B</option>
+            <option value="ShiftC">Shift C</option>
+        </select>
+    </div>
+
+    <div class="dashboard-container">
+
+        <!-- DYNAMIC VALVE INSPECTION SESSION CONTROL PANEL -->
+        <div class="card mb-3 p-3 shadow-sm" style="background: rgba(15, 23, 42, 0.95); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 14px; color: #f8fafc;">
+            <div class="row align-items-center">
+                <div class="col-md-3">
+                    <label style="color:#38bdf8; font-weight:700; font-size:14px; text-transform:uppercase; letter-spacing:1px;">Select Valve Type</label>
+                    <select id="sessionValveType" class="form-select bg-dark text-white border-secondary" style="font-weight:600;">
+                        <option value="Gate Valve">Gate Valve (7 Required Views)</option>
+                        <option value="Ball Valve">Ball Valve (5 Required Views)</option>
+                        <option value="Check Valve">Check Valve (6 Required Views)</option>
+                        <option value="Butterfly Valve">Butterfly Valve (8 Required Views)</option>
+                        <option value="Globe Valve">Globe Valve (10 Required Views)</option>
+                    </select>
+                </div>
+                <div class="col-md-3 text-center">
+                    <button id="btnStartSession" class="btn btn-primary btn-lg w-100 fw-bold shadow-sm" style="background: linear-gradient(135deg, #0284c7, #2563eb); border:none;">
+                        <i class="fas fa-play me-2"></i>Start New Inspection
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <div class="d-flex align-items-center justify-content-between p-2 rounded" style="background: rgba(30, 41, 59, 0.8); border: 1px solid rgba(255,255,255,0.1);">
+                        <div>
+                            <small class="text-muted text-uppercase fw-bold" style="font-size:11px;">Active Inspection ID</small>
+                            <div id="sessionInspectionId" class="fw-bold fs-5 text-info">NO ACTIVE SESSION</div>
+                        </div>
+                        <div class="text-end">
+                            <span id="sessionStatusBadge" class="badge bg-secondary fs-6 px-3 py-2">IDLE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <hr style="border-color: rgba(255,255,255,0.15);" class="my-3">
+
+            <!-- Progress & View Capture Row -->
+            <div class="row align-items-center">
+                <div class="col-md-5">
+                    <div class="d-flex justify-content-between mb-1">
+                        <span class="fw-bold text-light" style="font-size:14px;">Inspection Progress</span>
+                        <span id="sessionProgressText" class="fw-bold text-info">0 / 0 Captured (0%)</span>
+                    </div>
+                    <div class="progress" style="height: 14px; background: rgba(255,255,255,0.1); border-radius: 7px;">
+                        <div id="sessionProgressBar" class="progress-bar progress-bar-striped progress-bar-animated bg-info" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-4 text-center">
+                    <div class="px-3 py-2 rounded" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.4);">
+                        <small class="text-info text-uppercase fw-bold" style="font-size:11px; letter-spacing:0.5px;">Next Required View</small>
+                        <div id="sessionNextPosition" class="fw-bold text-white fs-5">[ SELECT VALVE TYPE ]</div>
+                    </div>
+                </div>
+
+                <div class="col-md-3 d-flex gap-2">
+                    <button id="btnCaptureView" class="btn btn-info w-50 fw-bold text-dark" disabled>
+                        <i class="fas fa-camera me-1"></i>Capture View
+                    </button>
+                    <button id="btnCompleteSession" class="btn btn-success w-50 fw-bold" disabled>
+                        <i class="fas fa-check-circle me-1"></i>Finalize
+                    </button>
+                </div>
+            </div>
+
+            <!-- Camera Status Badges -->
+            <div class="d-flex align-items-center gap-3 mt-3 pt-2 border-top border-secondary border-opacity-25" style="font-size:13px;">
+                <span class="fw-bold text-muted"><i class="fas fa-network-wired me-1"></i>Cameras:</span>
+                <span id="badgeCam1" class="badge bg-success"><i class="fas fa-circle me-1" style="font-size:8px;"></i>CAM-01 Connected</span>
+                <span id="badgeCam2" class="badge bg-success"><i class="fas fa-circle me-1" style="font-size:8px;"></i>CAM-02 Connected</span>
+                <span id="badgeCam3" class="badge bg-success"><i class="fas fa-circle me-1" style="font-size:8px;"></i>CAM-03 Connected</span>
+                <span id="badgeCam4" class="badge bg-secondary"><i class="fas fa-circle me-1" style="font-size:8px;"></i>CAM-04 Standby</span>
+            </div>
+        </div>
+
+        <!-- ROW 1: LIVE CAMERA SECTION (3 camera cards, equal width, responsive) -->
+        <div class="main-panel">
+
+            <div class="camera-section">
+
+                <h5 class="section-title">LIVE VALVE INSPECTION</h5>
+
+                <div class="camera-grid">
+
+                    <div class="camera-box">
+                        <img id="cam1" class="camera-feed">
+                        <span>Cam 1 — Top</span>
+                    </div>
+
+                    <div class="camera-box">
+                        <img id="cam2" class="camera-feed">
+                        <span>Cam 2 — Side</span>
+                    </div>
+
+                    <div class="camera-box">
+                        <img id="cam3" class="camera-feed">
+                        <span>Cam 3 — Front</span>
+                    </div>
+
+                </div>
+
+                <!-- CAMERA CONTROLS -->
+                <div class="control-buttons">
+
+                    <button class="btn btn-success"
+                        id="startBtn"
+                        title="Start Camera (Space)">
+                        <i class="fas fa-video"></i>
+                        Start Camera
+                    </button>
+
+                    <button class="btn btn-danger"
+                        id="stopBtn"
+                        title="Stop Camera (Space Space)">
+                        <i class="fas fa-stop"></i>
+                        Stop Camera
+                    </button>
+                    <button class="btn btn-primary"
+                        id="uploadBtn">
+                        <i class="fas fa-upload"></i>
+                        Upload Image
+                    </button>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- ROW 2: Inspection Statistics / Live Reading / Shift-wise Report / Reference Data -->
+        <div class="side-panel">
+
+            <div class="cards-row">
+
+                <!-- INSPECTION STATISTICS -->
+                <div class="status-card">
+
+                    <h3>INSPECTION STATISTICS</h3>
+
+                    <div class="status-boxes">
+
+                        <div class="status">
+                            <h4 id="totalCount">0</h4>
+                            <p>Total</p>
+                        </div>
+
+                        <div class="status">
+                            <h4 id="passCount">0</h4>
+                            <p>Passed</p>
+                        </div>
+
+                        <div class="status">
+                            <h4 class="rejected"
+                                id="rejectCount">
+                                0
+                            </h4>
+                            <p>Rejected</p>
+                        </div>
+                    </div>
+
+                    <div class="progress-bars">
+
+                        <label>Pass Rate</label>
+                        <div class="bar-track" id="passBarTrack">
+                            <div class="bar-fill" id="passBar" style="--progress:0%"></div>
+                            <span class="bar-percent" id="passPercentLabel">0</span>
+                        </div>
+
+                        <label>Reject Rate</label>
+                        <div class="bar-track reject" id="rejectBarTrack">
+                            <div class="bar-fill" id="rejectBar" style="--progress:0%"></div>
+                            <span class="bar-percent" id="rejectPercentLabel">0</span>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- LIVE DATA -->
+                <div class="data-card">
+                    <h6>LIVE READING</h6>
+
+                    <p>Component
+                        <span id="liveComponent">—</span>
+                    </p>
+
+                    <p>SSIM Score
+                        <span id="liveHeight">—</span>
+                    </p>
+
+                    <p>Status
+                        <span class="status waiting"
+                            id="liveStatus">
+                            Waiting
+                        </span>
+                    </p>
+                </div>
+
+                <!-- SHIFT GRAPH -->
+                <div class="graph-card">
+                    <h3>SHIFT-WISE INSPECTION REPORT</h3>
+                    <canvas id="shiftChart"></canvas>
+                </div>
+
+                <!-- REFERENCE DATA -->
+                <div class="data-card">
+                    <h6>REFERENCE DATA</h6>
+
+                    <p>Min SSIM Score
+                        <span>45.2</span>
+                    </p>
+
+                    <p>Max SSIM Score
+                        <span>48.8</span>
+                    </p>
+
+                    <p>Quality
+                        <span id="quality">Standard</span>
+                    </p>
+                </div>
+
+            </div>
+
+            <!-- INSPECTION DETAILS -->
+            <div id="inspectionDetailsSection"
+                class="inspection-details mt-3">
+
+                {% if inspection %}
+
+                <table class="table table-bordered table-sm">
+
+                    <tr>
+                        <th>Part Number</th>
+                        <td>{{ inspection.part_number }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Result</th>
+                        <td>{{ inspection.result }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>SSIM Score</th>
+                        <td>{{ inspection.ssim_score }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Defect Type</th>
+                        <td>{{ inspection.defect_type }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Best Match</th>
+                        <td>{{ inspection.trained_image }}</td>
+                    </tr>
+
+                    <tr>
+                        <th>Timestamp</th>
+                        <td>{{ inspection.timestamp }}</td>
+                    </tr>
+                </table>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+<form id="uploadForm" style="display:none;">
+    <input type="file"
+        id="imageInput"
+        name="image"
+        accept="image/*">
+</form>
+
+<!-- Page-local shortcut toast -->
+<div id="page-shortcut-toast"></div>
+
+<!-- Big live inspection result stamp -->
+<div id="resultStamp"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.3.0/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='JS/main.js') }}"></script>
+
+<!-- Space shortcut for camera start/stop -->
+<script>
+    (function () {
+        var toastEl = document.getElementById("page-shortcut-toast");
+        var toastTimer = null;
+
+        function showToast(text) {
+            if (!toastEl) return;
+            toastEl.textContent = text;
+            toastEl.classList.add("show");
+            clearTimeout(toastTimer);
+            toastTimer = setTimeout(function () {
+                toastEl.classList.remove("show");
+            }, 1200);
+        }
+
+        function isTypingContext(target) {
+            var tag = (target.tagName || "").toLowerCase();
+            return (
+                tag === "input" ||
+                tag === "textarea" ||
+                tag === "select" ||
+                target.isContentEditable
+            );
+        }
+
+        // Spacebar shortcut script
+        var SPACE_DOUBLE_PRESS_WINDOW_MS = 350;
+        var spacePendingTimer = null;
+
+        document.addEventListener("keydown", function (e) {
+            if (e.code !== "Space") return;
+            if (e.ctrlKey || e.altKey || e.metaKey || e.shiftKey) return;
+            if (isTypingContext(e.target)) return;
+
+            e.preventDefault();
+            if (e.repeat) return;
+
+            if (spacePendingTimer) {
+                clearTimeout(spacePendingTimer);
+                spacePendingTimer = null;
+                var stopEl = document.getElementById("stopBtn");
+                if (stopEl) {
+                    showToast("Stop Camera");
+                    stopEl.click();
+                }
+                return;
+            }
+
+            spacePendingTimer = setTimeout(function () {
+                spacePendingTimer = null;
+                var startEl = document.getElementById("startBtn");
+                if (startEl) {
+                    showToast("Start Camera");
+                    startEl.click();
+                }
+            }, SPACE_DOUBLE_PRESS_WINDOW_MS);
+        });
+    })();
+
+    // Dynamic Inspection Session Manager JS
+    document.addEventListener("DOMContentLoaded", function() {
+        var btnStartSession = document.getElementById("btnStartSession");
+        var btnCaptureView = document.getElementById("btnCaptureView");
+        var btnCompleteSession = document.getElementById("btnCompleteSession");
+        var sessionValveType = document.getElementById("sessionValveType");
+        var sessionInspectionId = document.getElementById("sessionInspectionId");
+        var sessionStatusBadge = document.getElementById("sessionStatusBadge");
+        var sessionProgressText = document.getElementById("sessionProgressText");
+        var sessionProgressBar = document.getElementById("sessionProgressBar");
+        var sessionNextPosition = document.getElementById("sessionNextPosition");
+        var resultStamp = document.getElementById("resultStamp");
+
+        function updateSessionUI(session) {
+            if (!session || !session.active) {
+                sessionInspectionId.textContent = "NO ACTIVE SESSION";
+                sessionStatusBadge.textContent = "IDLE";
+                sessionStatusBadge.className = "badge bg-secondary fs-6 px-3 py-2";
+                sessionProgressText.textContent = "0 / 0 Captured (0%)";
+                sessionProgressBar.style.width = "0%";
+                sessionNextPosition.textContent = "[ SELECT VALVE TYPE ]";
+                btnCaptureView.disabled = true;
+                btnCompleteSession.disabled = true;
+                btnStartSession.disabled = false;
+                return;
+            }
+
+            btnStartSession.disabled = true;
+            sessionInspectionId.textContent = session.inspection_id || "ACTIVE";
+            sessionStatusBadge.textContent = session.state || "IN PROGRESS";
+
+            if (session.state === "INSPECTION_COMPLETE" || session.state === "FINAL_DECISION") {
+                sessionStatusBadge.className = "badge bg-success fs-6 px-3 py-2";
+            } else {
+                sessionStatusBadge.className = "badge bg-info text-dark fs-6 px-3 py-2";
+            }
+
+            var cap = session.captured_count || 0;
+            var req = session.required_images || 0;
+            var pct = session.progress_pct || 0;
+
+            sessionProgressText.textContent = cap + " / " + req + " Captured (" + pct + "%)";
+            sessionProgressBar.style.width = pct + "%";
+
+            if (session.next_required_position) {
+                sessionNextPosition.textContent = session.next_required_position.toUpperCase();
+                btnCaptureView.disabled = false;
+            } else {
+                sessionNextPosition.textContent = "ALL VIEWS CAPTURED ✓";
+                btnCaptureView.disabled = true;
+            }
+
+            // Enable Finalize button if inspection is complete
+            if (cap >= req && req > 0) {
+                btnCompleteSession.disabled = false;
+                btnCompleteSession.classList.add("pulse");
+            } else {
+                btnCompleteSession.disabled = true;
+                btnCompleteSession.classList.remove("pulse");
+            }
+        }
+
+        function pollSessionStatus() {
+            fetch("/api/inspection/current_status")
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.status === "success") {
+                        updateSessionUI(data.session);
+                    }
+                })
+                .catch(function(err) { console.error("Session poll error:", err); });
+        }
+
+        if (btnStartSession) {
+            btnStartSession.addEventListener("click", function() {
+                var valveType = sessionValveType ? sessionValveType.value : "Gate Valve";
+                fetch("/api/inspection/start_session", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ valve_type: valveType })
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.status === "success") {
+                        pollSessionStatus();
+                    } else {
+                        alert("Start session error: " + (data.message || "Unknown error"));
+                    }
+                });
+            });
+        }
+
+        if (btnCaptureView) {
+            btnCaptureView.addEventListener("click", function() {
+                fetch("/api/inspection/capture_view", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({})
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.status === "success") {
+                        pollSessionStatus();
+                    } else {
+                        alert("Capture error: " + (data.message || "Failed to capture image"));
+                    }
+                });
+            });
+        }
+
+        if (btnCompleteSession) {
+            btnCompleteSession.addEventListener("click", function() {
+                btnCompleteSession.disabled = true;
+                fetch("/api/inspection/complete", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({})
+                })
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                    if (data.status === "success") {
+                        var resText = (data.finalized_session && data.finalized_session.final_result) || "ACCEPTED";
+                        if (resultStamp) {
+                            resultStamp.textContent = resText;
+                            resultStamp.className = "show " + resText.toLowerCase();
+                            setTimeout(function() { resultStamp.className = ""; }, 3000);
+                        }
+                        pollSessionStatus();
+                    } else {
+                        alert("Finalize error: " + (data.message || "Failed to finalize inspection"));
+                        btnCompleteSession.disabled = false;
+                    }
+                });
+            });
+        }
+
+        // Initial poll and 1.5s interval
+        pollSessionStatus();
+        setInterval(pollSessionStatus, 1500);
+    });
+</script>
+{% endblock %}

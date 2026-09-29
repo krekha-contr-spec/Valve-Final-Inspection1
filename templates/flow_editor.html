@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VisionMaster v4.4.0</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/flow.css') }}">
+    <style>
+        .main-container {
+            display: flex;
+            height: calc(100vh - 60px);
+            width: 100%;
+        }
+
+        .sidebar {
+            min-width: 220px;
+            max-width: 420px;
+            overflow: auto;
+        }
+
+        .left-sidebar {
+            width: 260px;
+        }
+
+        .right-sidebar {
+            width: 320px;
+        }
+
+        .canvas-area {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .resize-handle {
+            width: 6px;
+            cursor: col-resize;
+            background: transparent;
+        }
+
+        .resize-handle:hover {
+            background: #4f46e5;
+        }
+
+        body.resizing {
+            user-select: none;
+            cursor: col-resize;
+        }
+    </style>
+</head>
+
+<body>
+    <header class="header">
+        <div class="header-left">
+            <div class="logo">
+                <div class="logo-icon">🔷</div>
+                <span class="logo-text">VisionMaster <span class="version">v4.4.0</span></span>
+            </div>
+            <div class="separator"></div>
+            <nav class="nav-menu">
+                <div class="menu-item dropdown">
+                    <button class="menu-btn">File</button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="newProject(); return false;">📄 New Project</a>
+                        <a href="#" onclick="loadDemo(); return false;">⭕ Load Demo</a>
+                        <a href="#" onclick="importProject(); return false;">📤 Import</a>
+                        <a href="#" onclick="exportProject(); return false;">📥 Export</a>
+                    </div>
+                </div>
+
+                <div class="menu-item dropdown">
+                    <button class="menu-btn">Edit</button>
+                    <div class="dropdown-content">
+                        <a href="#" onclick="undo(); return false;">↶ Undo</a>
+                        <a href="#" onclick="redo(); return false;">↷ Redo</a>
+                        <hr>
+                        <a href="#" onclick="deleteNode(); return false;" class="danger">🗑 Delete</a>
+                        <a href="#" onclick="clearCanvas(); return false;" class="danger">⚠ Clear All</a>
+                    </div>
+                </div>
+
+                <div class="menu-item dropdown">
+                    <button class="menu-btn">View</button>
+                    <div class="dropdown-content">
+                        <label><input type="checkbox" id="showGrid" checked> Grid</label>
+                        <label><input type="checkbox" id="showMinimap" checked> Minimap</label>
+                        <label><input type="checkbox" id="showPanel" checked> Properties</label>
+                    </div>
+                </div>
+
+                <div class="menu-item dropdown">
+                    <button class="menu-btn">Tools</button>
+                    <div class="dropdown-content">
+                        <a href="#">⚙ Preferences</a>
+                        <a href="#">🖥 Device Config</a>
+                        <a href="#">ℹ System Info</a>
+                    </div>
+                </div>
+            </nav>
+        </div>
+
+        <div class="header-right">
+            <div class="status-bar">
+                <div class="status-item">
+                    <span class="status-icon green">●</span>
+                    <span>PLC: Connected</span>
+                </div>
+                <div class="status-item">
+                    <span class="status-icon green">●</span>
+                    <span>DSP: Ready</span>
+                </div>
+            </div>
+            <span class="project-name" id="projectName">Untitled_Project</span>
+            <button class="btn btn-outline" onclick="exportProject()">💾 Save</button>
+            <button class="btn btn-primary" id="runBtn" onclick="runWorkflow()">▶ Run</button>
+        </div>
+    </header>
+    <div class="main-container">
+        <aside class="sidebar left-sidebar" id="leftSidebar">
+            <div class="sidebar-header">
+                <input type="text" id="searchTools" placeholder="Search tools..." class="search-input">
+                <button class="clear-btn" id="clearSearchBtn" onclick="clearSearch()" style="display:none;">✕
+                    Clear</button>
+            </div>
+
+            <div class="tools-container" id="toolsContainer">
+            </div>
+        </aside>
+        <div class="resize-handle" id="leftResize"></div>
+        <main class="canvas-area">
+            <div class="canvas" id="canvas">
+                <svg id="canvasSvg" class="workflow-canvas"></svg>
+                <div class="nodes-container" id="nodesContainer"></div>
+                <div class="status-overlay">
+                    <span id="statsText">Nodes: 0 | Connections: 0</span>
+                    <span id="execTimeText"></span>
+                </div>
+            </div>
+        </main>
+        <div class="resize-handle" id="rightResize"></div>
+        <aside class="sidebar right-sidebar" id="rightSidebar" style="display:none;">
+            <div class="tabs">
+                <button class="tab-btn active" onclick="switchTab('config')">Config</button>
+                <button class="tab-btn" onclick="switchTab('notes')">Notes</button>
+            </div>
+
+            <div class="sidebar-content">
+                <div class="module-header">
+                    <h3 id="moduleName">Select a module</h3>
+                    <p id="moduleId"></p>
+                </div>
+
+                <div id="configTab" class="tab-content active">
+                    <div class="form-group">
+                        <label>Enabled</label>
+                        <input type="checkbox" id="moduleEnabled" checked>
+                    </div>
+                    <div class="form-group">
+                        <label>Timeout (ms)</label>
+                        <input type="number" id="moduleTimeout" value="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Retry Count</label>
+                        <input type="number" id="moduleRetry" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label><input type="checkbox" id="moduleSkipError"> Skip on Error</label>
+                    </div>
+                </div>
+
+                <div id="notesTab" class="tab-content">
+                    <textarea id="moduleNotes" placeholder="Add notes about this module..."></textarea>
+                </div>
+
+                <div class="sidebar-footer">
+                    <button class="btn btn-primary" onclick="applyChanges()">Apply Changes</button>
+                    <button class="btn btn-outline" onclick="resetModule()">Reset</button>
+                </div>
+            </div>
+        </aside>
+    </div>
+    <input type="file" id="fileInput" accept=".json" style="display:none;">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='JS/app.js')}}"></script>
+    <script src="{{ url_for('static', filename='JS/workflow.js')}}"></script>
+    <script src="{{ url_for('static', filename='JS/tool.js')}}"></script>
+    <script>
+        const leftSidebar = document.getElementById("leftSidebar");
+        const rightSidebar = document.getElementById("rightSidebar");
+        const leftResize = document.getElementById("leftResize");
+        const rightResize = document.getElementById("rightResize");
+
+        let isResizing = false;
+        let activeSide = null;
+
+        function startResize(side) {
+            isResizing = true;
+            activeSide = side;
+            document.body.classList.add("resizing");
+        }
+
+        function stopResize() {
+            isResizing = false;
+            activeSide = null;
+            document.body.classList.remove("resizing");
+        }
+
+        function resize(e) {
+            if (!isResizing) return;
+
+            if (activeSide === "left") {
+                const width = e.clientX;
+                if (width >= 220 && width <= 420) {
+                    leftSidebar.style.width = width + "px";
+                }
+            }
+
+            if (activeSide === "right") {
+                const width = window.innerWidth - e.clientX;
+                if (width >= 220 && width <= 420) {
+                    rightSidebar.style.width = width + "px";
+                }
+            }
+        }
+
+        leftResize.addEventListener("mousedown", () => startResize("left"));
+        rightResize.addEventListener("mousedown", () => startResize("right"));
+
+        document.addEventListener("mousemove", resize);
+        document.addEventListener("mouseup", stopResize);
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,99 @@
+{
+  "inspection_id": "INS-20260826-0014",
+  "valve_type": "Check Valve",
+  "required_images": 6,
+  "positions": [
+    "Front",
+    "Back",
+    "Top",
+    "Bottom",
+    "Inlet",
+    "Outlet"
+  ],
+  "operator": "Operator",
+  "start_time": "2026-08-26T17:20:12.502882",
+  "end_time": null,
+  "status": "INSPECTION_STARTED",
+  "final_result": "PENDING",
+  "captured_images": [
+    {
+      "image_id": "IMG_cam1_FRONT_20260826_172014_4",
+      "inspection_id": "INS-20260826-0014",
+      "camera_id": "cam1",
+      "image_position": "Front",
+      "file_path": "inspections/2026/08/26/INS-20260826-0014/cam1/IMG_cam1_FRONT_20260826_172014_4.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0014\\cam1\\IMG_cam1_FRONT_20260826_172014_4.jpg",
+      "timestamp": "2026-08-26T17:20:14.451097",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "3882a773b368d03d0a18f8f954709353",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_BACK_20260826_172014_7",
+      "inspection_id": "INS-20260826-0014",
+      "camera_id": "cam1",
+      "image_position": "Back",
+      "file_path": "inspections/2026/08/26/INS-20260826-0014/cam1/IMG_cam1_BACK_20260826_172014_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0014\\cam1\\IMG_cam1_BACK_20260826_172014_7.jpg",
+      "timestamp": "2026-08-26T17:20:14.755851",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "05fbd02da0fb4546f0199831ce9dbc50",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_TOP_20260826_172015_0",
+      "inspection_id": "INS-20260826-0014",
+      "camera_id": "cam1",
+      "image_position": "Top",
+      "file_path": "inspections/2026/08/26/INS-20260826-0014/cam1/IMG_cam1_TOP_20260826_172015_0.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0014\\cam1\\IMG_cam1_TOP_20260826_172015_0.jpg",
+      "timestamp": "2026-08-26T17:20:15.029686",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "2332cb02d70a21e63c9b77fbb5aae54b",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_BOTTOM_20260826_172015_2",
+      "inspection_id": "INS-20260826-0014",
+      "camera_id": "cam1",
+      "image_position": "Bottom",
+      "file_path": "inspections/2026/08/26/INS-20260826-0014/cam1/IMG_cam1_BOTTOM_20260826_172015_2.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0014\\cam1\\IMG_cam1_BOTTOM_20260826_172015_2.jpg",
+      "timestamp": "2026-08-26T17:20:15.273832",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "275c29be4dafec11be27b665665d14c4",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_INLET_20260826_172015_5",
+      "inspection_id": "INS-20260826-0014",
+      "camera_id": "cam1",
+      "image_position": "Inlet",
+      "file_path": "inspections/2026/08/26/INS-20260826-0014/cam1/IMG_cam1_INLET_20260826_172015_5.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0014\\cam1\\IMG_cam1_INLET_20260826_172015_5.jpg",
+      "timestamp": "2026-08-26T17:20:15.508965",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "2fa6986a85f3dbfbd25f0b4af115e975",
+      "status": "VALID"
+    },
+    {
+      "image_id": "IMG_cam1_OUTLET_20260826_172015_7",
+      "inspection_id": "INS-20260826-0014",
+      "camera_id": "cam1",
+      "image_position": "Outlet",
+      "file_path": "inspections/2026/08/26/INS-20260826-0014/cam1/IMG_cam1_OUTLET_20260826_172015_7.jpg",
+      "abs_path": "D:\\C102641-Data\\Valve_Final_Inspection (1) - Copy\\inspections\\2026\\08\\26\\INS-20260826-0014\\cam1\\IMG_cam1_OUTLET_20260826_172015_7.jpg",
+      "timestamp": "2026-08-26T17:20:15.735834",
+      "width": 1280,
+      "height": 720,
+      "image_hash": "58c966a10e6b4ee52bcadb2087b2dfd2",
+      "status": "VALID"
+    }
+  ],
+  "defects": []
+}

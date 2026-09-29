@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ValveInspect System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: #0a0e27;
+            color: #e4e4e7;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 245px;
+            background: #0f1330;
+            border-right: 1px solid #1e293b;
+            padding: 30px 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo {
+            margin-bottom: 50px;
+        }
+
+        .logo h1 {
+            color: #60a5fa;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .nav-menu {
+            flex: 1;
+            list-style: none;
+        }
+
+        .nav-item {
+            margin-bottom: 8px;
+        }
+
+        .nav-link {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .nav-link:hover {
+            background: #1e293b;
+            color: #e4e4e7;
+        }
+
+        .nav-link.active {
+            background: #1e40af;
+            color: #fff;
+        }
+
+        .nav-link svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .system-status {
+            margin-top: auto;
+            padding: 16px;
+            background: #1e293b;
+            border-radius: 8px;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #22c55e;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+
+            0%,
+            100% {
+                opacity: 1;
+            }
+
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .status-indicator span {
+            color: #22c55e;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-details {
+            font-size: 11px;
+            color: #64748b;
+            line-height: 1.6;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        .date-display {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 16px;
+            background: #1e293b;
+            border-radius: 8px;
+            border: 1px solid #334155;
+            font-size: 14px;
+        }
+
+        .date-display svg {
+            width: 16px;
+            height: 16px;
+            color: #60a5fa;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #60a5fa, transparent);
+        }
+
+        .stat-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .stat-title {
+            font-size: 13px;
+            color: #94a3b8;
+            font-weight: 500;
+        }
+
+        .stat-icon {
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            background: rgba(96, 165, 250, 0.1);
+        }
+
+        .stat-icon svg {
+            width: 18px;
+            height: 18px;
+            color: #60a5fa;
+        }
+
+        .stat-icon.success svg {
+            color: #22c55e;
+        }
+
+        .stat-icon.danger svg {
+            color: #ef4444;
+        }
+
+        .stat-value {
+            font-size: 42px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .stat-card.success .stat-value {
+            color: #22c55e;
+        }
+
+        .stat-card.danger .stat-value {
+            color: #ef4444;
+        }
+
+        /* Two Column Layout */
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1.5fr 1fr;
+            gap: 30px;
+        }
+
+        /* Card */
+        .card {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 24px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #334155;
+        }
+
+        .card-header svg {
+            width: 20px;
+            height: 20px;
+            color: #60a5fa;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        /* Inspection List */
+        .inspection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .inspection-item {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .inspection-item:hover {
+            background: #1e293b;
+            border-color: #475569;
+            transform: translateX(4px);
+        }
+
+        .valve-image {
+            width: 48px;
+            height: 48px;
+            border-radius: 8px;
+            background: #334155;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #94a3b8;
+            font-weight: 600;
+        }
+
+        .inspection-info {
+            flex: 1;
+        }
+
+        .inspection-id {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .inspection-time {
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .inspection-defects {
+            font-size: 13px;
+            color: #94a3b8;
+            margin-right: 12px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-badge.ng {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+
+        .status-badge.ok {
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        /* Performance Chart */
+        .chart-container {
+            margin-top: 20px;
+        }
+
+        .chart-bars {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .chart-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chart-label {
+            width: 50px;
+            font-size: 13px;
+            color: #94a3b8;
+        }
+
+        .chart-bar-bg {
+            flex: 1;
+            height: 36px;
+            background: #0f172a;
+            border-radius: 6px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .chart-bar-fill {
+            height: 100%;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            padding-right: 12px;
+            font-size: 13px;
+            font-weight: 600;
+            transition: width 1s ease;
+        }
+
+        .chart-bar-fill.total {
+            background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        }
+
+        .chart-bar-fill.pass {
+            background: linear-gradient(90deg, #10b981, #22c55e);
+        }
+
+        .chart-bar-fill.fail {
+            background: linear-gradient(90deg, #dc2626, #ef4444);
+        }
+
+        /* System Status Section */
+        .status-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 16px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            border-radius: 8px;
+        }
+
+        .status-item-name {
+            font-size: 14px;
+            color: #e4e4e7;
+        }
+
+        .status-item-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            background: rgba(34, 197, 94, 0.15);
+            color: #22c55e;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-item-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #22c55e;
+            border-radius: 50%;
+        }
+
+        /* Responsive */
+        @media (max-width: 1200px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo">
+            <h1>ValveInspect</h1>
+            <p>System V.2.0</p>
+        </div>
+
+        <ul class="nav-menu">
+            <li class="nav-item">
+                <a href="{{ url_for('dashboard') }}" class="nav-link active">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                    </svg>
+                    Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="/" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    Inspection Monitor
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                    </svg>
+                    Cameras
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="{{ url_for('filter') }}" class="nav-link">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    History Log
+                </a>
+            </li>
+        </ul>
+
+        <div class="system-status">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span>System Operational</span>
+            </div>
+            <div class="status-details">
+                Hikrobot Driver: Connected<br>
+                Database: Connected<br>
+                Uptime: 24h 12m
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="header">
+            <div>
+                <h1>Dashboard Overview</h1>
+                <p>Real-time inspection metrics and system status.</p>
+            </div>
+            <div class="date-display">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                <span id="currentDate">January 07, 2026</span>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Total Inspections</span>
+                    <div class="stat-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="totalInspections">18</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-header">
+                    <span class="stat-title">Today's Count</span>
+                    <div class="stat-icon">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="todayCount">13</div>
+            </div>
+
+            <div class="stat-card success">
+                <div class="stat-header">
+                    <span class="stat-title">Pass Rate</span>
+                    <div class="stat-icon success">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="passRate">50.0%</div>
+            </div>
+
+            <div class="stat-card danger">
+                <div class="stat-header">
+                    <span class="stat-title">Defect Count</span>
+                    <div class="stat-icon danger">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="defectCount">9</div>
+            </div>
+        </div>
+
+        <!-- Content Grid -->
+        <div class="content-grid">
+            <!-- Recent Inspections -->
+            <div class="card">
+                <div class="card-header">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <h2 class="card-title">Recent Inspections</h2>
+                </div>
+
+                <div class="inspection-list" id="inspectionList">
+                    <div class="inspection-item">
+                        <div class="valve-image">Valve</div>
+                        <div class="inspection-info">
+                            <div class="inspection-id">SN-8151</div>
+                            <div class="inspection-time">Jan 07, 09:08:32</div>
+                        </div>
+                        <span class="inspection-defects">2 defects</span>
+                        <span class="status-badge ng">NG</span>
+                    </div>
+
+                    <div class="inspection-item">
+                        <div class="valve-image">Valve</div>
+                        <div class="inspection-info">
+                            <div class="inspection-id">SN-583</div>
+                            <div class="inspection-time">Jan 07, 09:08:32</div>
+                        </div>
+                        <span class="inspection-defects">2 defects</span>
+                        <span class="status-badge ng">NG</span>
+                    </div>
+
+                    <div class="inspection-item">
+                        <div class="valve-image">Valve</div>
+                        <div class="inspection-info">
+                            <div class="inspection-id">SN-8947</div>
+                            <div class="inspection-time">Jan 07, 09:08:31</div>
+                        </div>
+                        <span class="inspection-defects">2 defects</span>
+                        <span class="status-badge ng">NG</span>
+                    </div>
+
+                    <div class="inspection-item">
+                        <div class="valve-image">Valve</div>
+                        <div class="inspection-info">
+                            <div class="inspection-id">SN-9115</div>
+                            <div class="inspection-time">Jan 07, 09:08:31</div>
+                        </div>
+                        <span class="inspection-defects">2 defects</span>
+                        <span class="status-badge ng">NG</span>
+                    </div>
+
+                    <div class="inspection-item">
+                        <div class="valve-image">Valve</div>
+                        <div class="inspection-info">
+                            <div class="inspection-id">SN-5728</div>
+                            <div class="inspection-time">Jan 07, 09:08:30</div>
+                        </div>
+                        <span class="inspection-defects">2 defects</span>
+                        <span class="status-badge ng">NG</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Column -->
+            <div>
+                <!-- Performance Distribution -->
+                <div class="card" style="margin-bottom: 30px;">
+                    <div class="card-header">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 8v8m-4-5v5m-4-2v2m-2 4h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <h2 class="card-title">Performance Distribution</h2>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-bars">
+                            <div class="chart-bar">
+                                <div class="chart-label">Total</div>
+                                <div class="chart-bar-bg">
+                                    <div class="chart-bar-fill total" style="width: 100%;">18</div>
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="chart-label">Pass</div>
+                                <div class="chart-bar-bg">
+                                    <div class="chart-bar-fill pass" style="width: 50%;">9</div>
+                                </div>
+                            </div>
+                            <div class="chart-bar">
+                                <div class="chart-label">Fail</div>
+                                <div class="chart-bar-bg">
+                                    <div class="chart-bar-fill fail" style="width: 50%;">9</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Status -->
+                <div class="card">
+                    <div class="card-header">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <h2 class="card-title">System Status</h2>
+                    </div>
+
+                    <div class="status-list">
+                        <div class="status-item">
+                            <span class="status-item-name">Valve Inspection Station 1</span>
+                            <span class="status-item-badge">ONLINE</span>
+                        </div>
+                        <div class="status-item">
+                            <span class="status-item-name">Valve Inspection Station 2</span>
+                            <span class="status-item-badge">ONLINE</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script>
+        // Update current date
+        function updateDate() {
+            const date = new Date();
+            const options = { year: 'numeric', month: 'long', day: '2-digit' };
+            document.getElementById('currentDate').textContent = date.toLocaleDateString('en-US', options);
+        }
+
+        // Simulate real-time data updates
+        function updateStats() {
+            const totalInspections = parseInt(document.getElementById('totalInspections').textContent);
+            const newTotal = totalInspections + Math.floor(Math.random() * 2);
+
+            document.getElementById('totalInspections').textContent = newTotal;
+            document.getElementById('todayCount').textContent = Math.floor(newTotal * 0.7);
+
+            // Update pass rate
+            const passRate = (40 + Math.random() * 20).toFixed(1);
+            document.getElementById('passRate').textContent = passRate + '%';
+
+            // Update defect count
+            const defects = Math.floor(Math.random() * 15);
+            document.getElementById('defectCount').textContent = defects;
+        }
+
+        // Add new inspection to list
+        function addInspection() {
+            const list = document.getElementById('inspectionList');
+            const now = new Date();
+            const timeStr = now.toLocaleString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+
+            const sn = 'SN-' + Math.floor(Math.random() * 10000);
+            const defects = Math.floor(Math.random() * 5);
+            const status = Math.random() > 0.5 ? 'ng' : 'ok';
+
+            const newItem = document.createElement('div');
+            newItem.className = 'inspection-item';
+            newItem.style.animation = 'slideIn 0.3s ease';
+            newItem.innerHTML = `
+                <div class="valve-image">Valve</div>
+                <div class="inspection-info">
+                    <div class="inspection-id">${sn}</div>
+                    <div class="inspection-time">${timeStr}</div>
+                </div>
+                <span class="inspection-defects">${defects} defects</span>
+                <span class="status-badge ${status}">${status.toUpperCase()}</span>
+            `;
+
+            list.insertBefore(newItem, list.firstChild);
+
+            // Keep only last 5 items
+            while (list.children.length > 5) {
+                list.removeChild(list.lastChild);
+            }
+        }
+
+        // Initialize
+        updateDate();
+
+        // Update stats every 10 seconds
+        setInterval(updateStats, 10000);
+
+        // Add new inspection every 15 seconds
+        setInterval(addInspection, 15000);
+
+        // Add animation style
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    opacity: 0;
+                    transform: translateX(-20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateX(0);
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+
+</html>

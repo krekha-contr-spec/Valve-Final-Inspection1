@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vision System for Valve Final Inspection</title>
+    <link rel="icon" type="image/jpeg" href="static/inspection.png" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='CSS/trained.css') }}">
+</head>
+{% extends "nav.html" %}
+{% block title %}Edges Inspection{% endblock %}
+
+{% block content %}
+
+<body>
+    <div class="training-container">
+        <div class="training-header">
+            <h1>Edge-Based Training System</h1>
+            <p class="highlight-text">Train reference edges for component inspection</p>
+        </div>
+
+        <div class="info-box">
+            <h4>How Edge Detection Works</h4>
+            <p>Upload reference images of good components. The system will extract edge contours which are used during
+                live inspection.
+                Test components must fit within the trained edge template to be accepted.</p>
+        </div>
+
+        <div class="training-grid">
+            <div class="training-panel">
+                <h2 class="panel-title">Train New Reference</h2>
+                <form id="trainForm">
+                    <div class="form-group">
+                        <label for="partNumber">Part Number</label>
+                        <input type="text" id="partNumber" name="part_number" placeholder="e.g., 46152, 48290" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="trainImage">Reference Image</label>
+                        <input type="file" id="trainImage" name="image" accept="image/*" required>
+                    </div>
+                    <button type="submit" class="btn-train">
+                        <i class="fas fa-brain"></i> Train Edge Detection
+                    </button>
+                </form>
+
+                <div class="loading" id="loadingIndicator">
+                    <i class="fas fa-spinner fa-spin fa-2x"></i>
+                    <p>Processing edges...</p>
+                </div>
+
+                <div class="result-area" id="resultArea">
+                    <h3>Training Result</h3>
+                    <img id="resultImage" class="result-image" src="" alt="Edge visualization">
+                    <div class="features-grid" id="featuresGrid"></div>
+                </div>
+            </div>
+
+            <div class="training-panel">
+                <h2 class="panel-title">Trained Parts</h2>
+                <div class="trained-parts-list" id="trainedPartsList">
+                    <p>Loading trained parts...</p>
+                </div>
+
+                <div id="edgesPreview" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{{ url_for('static', filename='JS/trained.js')}}"></script>
+</body>
+</html>
+{% endblock %}

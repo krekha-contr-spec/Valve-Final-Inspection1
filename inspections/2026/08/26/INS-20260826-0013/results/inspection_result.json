@@ -1,0 +1,10 @@
+{
+  "inspection_id": "INS-20260826-0013",
+  "valve_type": "Gate Valve",
+  "required_images": 7,
+  "captured_images_count": 7,
+  "final_result": "REJECTED",
+  "start_time": "2026-08-26T17:17:45.902720",
+  "end_time": "2026-08-26T17:19:49.329337",
+  "operator": "Operator"
+}

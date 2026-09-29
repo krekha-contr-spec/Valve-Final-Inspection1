@@ -1,0 +1,51 @@
+[
+  {
+    "image_id": "IMG_cam1_FRONT_20260826_171801_3",
+    "camera_id": "cam1",
+    "position": "Front",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_BACK_20260826_171932_1",
+    "camera_id": "cam1",
+    "position": "Back",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_LEFT_20260826_171936_7",
+    "camera_id": "cam1",
+    "position": "Left",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_RIGHT_20260826_171938_4",
+    "camera_id": "cam1",
+    "position": "Right",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_TOP_20260826_171939_1",
+    "camera_id": "cam1",
+    "position": "Top",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_BOTTOM_20260826_171939_4",
+    "camera_id": "cam1",
+    "position": "Bottom",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  },
+  {
+    "image_id": "IMG_cam1_MARKING_20260826_171939_6",
+    "camera_id": "cam1",
+    "position": "Marking",
+    "defect_type": "Unknown_Defect",
+    "result": "Error"
+  }
+]

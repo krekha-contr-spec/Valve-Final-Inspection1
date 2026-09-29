@@ -1,0 +1,43 @@
+{
+  "46152": {
+    "name": "Kappa 1.2L Inlet",
+    "type": "Inlet",
+    "golden_folder": "46152"
+  },
+
+  "46157": {
+    "name": "Kappa 1.2L Exhaust",
+    "type": "Exhaust",
+    "golden_folder": "46157"
+  },
+
+  "48290": {
+    "name": "TGDI 1L Inlet",
+    "type": "Inlet",
+    "golden_folder": "48290"
+  },
+
+  "48295": {
+    "name": "TGDI 1L Exhaust",
+    "type": "Exhaust",
+    "golden_folder": "48295"
+  },
+
+  "48460": {
+    "name": "Gamma Inlet",
+    "type": "Inlet",
+    "golden_folder": "48460"
+  },
+
+  "48465": {
+    "name": "Gamma Exhaust",
+    "type": "Exhaust",
+    "golden_folder": "48465"
+  },
+
+  "49020": {
+    "name": "TGDI 1.5L Inlet",
+    "type": "Inlet",
+    "golden_folder": "49020"
+  }
+}

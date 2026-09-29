@@ -1,0 +1,22 @@
+{
+  "inspection_id": "INS-20260826-0015",
+  "valve_type": "Gate Valve",
+  "operator": "Operator",
+  "required_images": 7,
+  "positions": [
+    "Front",
+    "Back",
+    "Left",
+    "Right",
+    "Top",
+    "Bottom",
+    "Marking"
+  ],
+  "captured_images": [],
+  "image_hashes": [],
+  "state": "INSPECTION_STARTED",
+  "start_time": "2026-08-26T17:21:46.371703",
+  "end_time": null,
+  "final_result": "PENDING",
+  "defects": []
+}
